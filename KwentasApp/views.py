@@ -172,14 +172,17 @@ def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-
+        remember_me = request.POST.get('remember_me') == 'on'
         user = authenticate(request, username=username, password=password)
-
+        
         if user is not None:
             logger.info(f'Successful login for user: {username}')
             login(request, user)
             request.session['just_logged_in'] = True
-
+            if remember_me:
+                request.session.set_expiry(1209600)  # 2 weeks
+            else:
+                request.session.set_expiry(0)  # Expire on browser close
             try:
                 # Check if the user has 2FA enabled
                 user_profile = UserProfile.objects.get(user=user)
@@ -313,7 +316,7 @@ def registration_view(request):
         form = RegistrationForm()
     return render(request, 'KwentasApp/register.html', {'form': form})
 
-
+@user_passes_test(is_superuser, login_url='login')
 def register_page(request):
     return render(request,'KwentasApp/register.html')
 
@@ -323,18 +326,24 @@ def logout_view(request):
 
 @login_required
 def homepage(request):
-    # Check if OTP is required and not verified
+    # Ensure 'just_logged_in' exists in the session
+    if 'just_logged_in' not in request.session:
+        request.session['just_logged_in'] = False
+
+    # Check OTP requirement
     if request.session.get('otp_required') and not request.session.get('otp_verified'):
         messages.error(request, 'You must verify the OTP to access the homepage.')
         return redirect('verify_otp')
 
-    print("homepage view called")  # Debugging print
     user_name = request.user.name if request.user.is_authenticated else "Guest"
 
     context = {
         'user_name': user_name,
+        'just_logged_in': request.session.get('just_logged_in', False),  # Ensure it's passed
     }
-    print("Context:", context)  # Debugging print
+
+    # Reset the flag after displaying the message
+    request.session['just_logged_in'] = False
 
     return render(request, 'KwentasApp/homepage.html', context)
 

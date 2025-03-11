@@ -14,6 +14,9 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Store sessions in the DB
+SESSION_COOKIE_AGE = 1209600  # 2 weeks (should match login expiry)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Prevents auto logout on browser close
 
 
 # Quick-start development settings - unsuitable for production
