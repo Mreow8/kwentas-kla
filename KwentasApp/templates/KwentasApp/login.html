@@ -13,6 +13,11 @@
     <title>Kwentas Klaras - Login</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
+  <style>
+    #show-password {
+      bottom: 14px;
+    }
+  </style>
   <body class="h-full">
     <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
       <div class="sm:mx-auto sm:w-full sm:max-w-2xl">
@@ -120,12 +125,12 @@
           var icon = document.querySelector("#show-password i");
           if (passwordInput.type === "password") {
             passwordInput.type = "text";
-            icon.classList.remove("fa-eye");
-            icon.classList.add("fa-eye-slash");
-          } else {
-            passwordInput.type = "password";
             icon.classList.remove("fa-eye-slash");
             icon.classList.add("fa-eye");
+          } else {
+            passwordInput.type = "password";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
           }
         });
 
