@@ -92,11 +92,21 @@ body {
   color: white;
 }
 
+.sidebar-list-item:hover > a {
+  color: white;
+}
 .sidebar-responsive {
   display: inline !important;
   position: absolute;
   z-index: 12 !important;
 }
+
+ul a{
+text-decoration: none;
+color: black;
+
+}
+
 
 /* ---------- MAIN ---------- */
 .main-container {
@@ -106,27 +116,16 @@ body {
   color: rgba(255, 255, 255, 0.95);
 }
 
-.charts {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* Two columns for larger screens */
-  gap: 30px; /* Increase the gap between charts */
-  max-height: 500px; /* Increase max height to make charts longer */
-  align-items: center; /* Center items vertically in the grid */
-}
-
-.charts .charts-card:only-child {
-  grid-column: 1 / -1; /* Span the entire width */
-}
 
 .charts-card {
   background-color: white;
-  margin-bottom: 10px; /* Space between cards */
-  padding: 30px; /* Add padding for more space inside */
+
+
   box-sizing: border-box;
   -webkit-column-break-inside: avoid;
   border-radius: 10px; /* Round borders */
   box-shadow: 0 10px 15px -5px rgba(0, 0, 0, 0.3); /* Stronger shadow */
-  min-height: 800px; /* Increased height */
+  min-height: 500px; /* Increased height */
   width: 100%; /* Full width for consistent layout */
   display: flex; /* Use Flexbox for alignment */
   flex-direction: column; /* Arrange items in a column */
@@ -152,10 +151,7 @@ body {
   background-color: skyblue;
 }
 
-.back-button-container {
-  display: flex;
-  justify-content: flex-end;
-}
+
 
 /* ---------- MEDIA QUERIES ---------- */
 

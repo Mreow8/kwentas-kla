@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
 from pathlib import Path
-
+import mimetypes
+mimetypes.add_type("text/css", ".css", True)
 PORT = os.getenv("PORT", "10000")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

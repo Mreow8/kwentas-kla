@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 * {
   margin: 0;
@@ -19,7 +20,6 @@
 
 .details {
   z-index: 2000; /* Ensure modals/cards are above the overlay */
-  display: none; /* Hidden by default, toggle with JavaScript */
 }
 
 /* Example card styling */
@@ -152,7 +152,6 @@ margin-top: 1%;
 }
 
 
-
 .table__body::-webkit-scrollbar{
   width: 0.5rem;
   height: 0.5rem;
@@ -171,8 +170,8 @@ margin-top: 1%;
 
 .table {
   width: 100%;
+  
 }
-
 
 .table, th, td {
   border-collapse: collapse;
@@ -218,6 +217,7 @@ margin-top: 1%;
 
 .status:hover{
   background-color: skyblue;
+  
   font-weight: 600;
   transform: scale(1.15);
   cursor: pointer;
@@ -308,6 +308,10 @@ z-index: 1100; /* Higher z-index than pagination */
   transform: scale(1.15);
   cursor: pointer;
 }
+
+
+
+
 /* Extra small devices (phones, 600px and down) */
 @media (max-width: 600px) {
   .export__file {
@@ -318,7 +322,7 @@ z-index: 1100; /* Higher z-index than pagination */
   .export__file .export__file-btn {
       width: 3rem;
       height: 1.5rem;
-      font-size: 0.50rem;
+      font-size: 0.75rem;
   }
   .back {
       
@@ -331,6 +335,8 @@ z-index: 1100; /* Higher z-index than pagination */
      
   }
 }
+
+
 /* Extra small devices (phones, 600px and down) */
 @media (max-width: 600px) {
   h1 {
@@ -342,6 +348,9 @@ z-index: 1100; /* Higher z-index than pagination */
  
  }
 }
+
+
+
 form, input {
   margin: 0;
   padding: 0;
@@ -351,7 +360,17 @@ form, input {
   color: inherit;
   outline: none;
   box-shadow: none;
+  appearance: none;
 }
+
+
+
+
+
+/* DETAILS CSS */
+
+
+/* DETAILS CSS */
 
 #details {
   max-width: 1300px;
@@ -391,6 +410,11 @@ margin-left: 30%;
 .utilizationRate{
   font-weight: 400;
 }
+
+
+
+
+
 @media screen and (max-width: 768px) {
   .details-container {
     flex-direction: column;
@@ -412,7 +436,13 @@ margin-left: 30%;
     margin-bottom: 20%;
   }
 }
+
+
+
+
 /* DETAILS CSS */
+
+
 .details {
   width: 100%;
   max-width: 650px;
@@ -451,6 +481,9 @@ margin-left: 30%;
 
 
 }
+
+
+
   /* User input box */
   .user-input-box {
     display: flex;
@@ -570,7 +603,7 @@ margin-left: 30%;
   background: white;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 90%;
+width: 90%;
   font-size: 14px;
 }
 
@@ -657,11 +690,35 @@ margin-left: 30%;
 .x {
 
   font-weight: 1000;
-  
+ 
   overflow: hidden;
   z-index: 999; /* Ensure the element appears above other content */
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* CARD CSS */
+
+
+
+
+
+
+
+/* Parent container to center the card */
 
 
 .login-content {
@@ -677,7 +734,16 @@ margin-left: 30%;
   form {
       width: 100%; /* Adjusted width */
   }
+
+ 
+
+ 
 }
+
+
+
+
+
 
 .login-content h2{
 margin: 10px 0;
@@ -736,6 +802,7 @@ form{
   justify-content: center;
 }
 }
+/* Add this style to hide the initial option */
 
 .entry-item table {
   width: 100%;
@@ -762,9 +829,33 @@ form{
 .entry-item table td:last-child {
   width: 30%;
 }
+
+/* plus sign */
+
+/* text */
+
+/* hover effect on button width */
+
+/* hover effect button's text */
+
+/* button click effect */
+
 .entry-item {
   text-align: left;
 }
+
+
+/* Base styles */
+
+/* Media queries for different screen sizes */
+
+/* Extra small devices (phones, 600px and down) */
+
+/* Small devices (portrait tablets and large phones, 600px to 768px) */
+
+/* Medium devices (landscape tablets, 768px to 992px) */
+
+/* Large devices (desktops, 992px and up) */
 
 
 .title {
@@ -823,8 +914,6 @@ form{
 .swal2-container {
   z-index: 10000 !important; /* Ensure SweetAlert is on top */
 }
-
-
 .pagination {
   text-align: center;
   position: fixed;
@@ -920,3 +1009,5 @@ form{
     margin: 0 2px;
   }
 }
+
+
