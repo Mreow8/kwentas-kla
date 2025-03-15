@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect  # Renders HTML templates and redirects to a new view or URL
 from django.contrib.auth.forms import UserCreationForm  # Form for creating a new user account
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import login, logout, authenticate  # Functions for handling login, logout, and authentication
 from django.contrib import messages  # Django messages framework for displaying feedback messages to users
 from django.contrib.auth.decorators import login_required, user_passes_test  # Decorators for restricting access to logged-in users or users passing a test
@@ -216,7 +217,6 @@ def base_view(request):
 def is_superuser(user):
     return user.is_authenticated and user.is_superuser
 
-
 @csrf_exempt
 def send_verification_code(request):
     if request.method == 'POST':
@@ -224,33 +224,37 @@ def send_verification_code(request):
             data = json.loads(request.body)
             email = data.get('email')
 
-            if email:
-                # Generate a 6-digit numeric verification code
-                code = ''.join(random.choices('0123456789', k=6))
-                subject = 'Your Verification Code'
-                text_content = f'Your verification code is: {code}'
+            # Check if email exists in the database
+            try:
+                user = CustomUser.objects.get(email=email)
+            except CustomUser.DoesNotExist:
+                logger.warning(f'Attempt to reset password for non-existent email: {email}')
+                return JsonResponse({'success': False, 'error': 'Email not found'}, status=404)  # Prevents sending OTP to unregistered users
 
-                try:
-                    html_content = render_to_string('KwentasApp/verification_email.html', {'code': code})
-                except Exception as e:
-                    logger.error(f'Error rendering email template: {str(e)}')
-                    return JsonResponse({'success': False, 'error': 'Error rendering email template.'}, status=500)
+            # Generate a 6-digit numeric verification code
+            code = ''.join(random.choices('0123456789', k=6))
+            subject = 'Your Verification Code'
+            text_content = f'Your verification code is: {code}'
 
-                try:
-                    msg = EmailMultiAlternatives(subject, text_content, 'kwentasklarasboljoon@gmail.com', [email])
-                    msg.attach_alternative(html_content, "text/html")
-                    msg.send()
+            try:
+                html_content = render_to_string('KwentasApp/verification_email.html', {'code': code})
+            except Exception as e:
+                logger.error(f'Error rendering email template: {str(e)}')
+                return JsonResponse({'success': False, 'error': 'Error rendering email template.'}, status=500)
 
-                    # Store the verification code and email in session
-                    request.session['verification_code'] = code
-                    request.session['email'] = email
-                    logger.info(f'Sent verification code to {email}')
-                    return JsonResponse({'success': True})
-                except Exception as e:
-                    logger.error(f'Error sending email to {email}: {str(e)}')
-                    return JsonResponse({'success': False, 'error': 'Error sending email.'}, status=500)
+            try:
+                msg = EmailMultiAlternatives(subject, text_content, 'kwentasklarasboljoon@gmail.com', [email])
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
 
-            return JsonResponse({'success': False, 'error': 'Invalid email'}, status=400)
+                # Store the verification code and email in session
+                request.session['verification_code'] = code
+                request.session['email'] = email
+                logger.info(f'Sent verification code to {email}')
+                return JsonResponse({'success': True})
+            except Exception as e:
+                logger.error(f'Error sending email to {email}: {str(e)}')
+                return JsonResponse({'success': False, 'error': 'Error sending email.'}, status=500)
 
         except json.JSONDecodeError:
             logger.warning('Invalid JSON format received in send_verification_code.')
@@ -336,6 +340,7 @@ def homepage(request):
         return redirect('verify_otp')
 
     user_name = request.user.name if request.user.is_authenticated else "Guest"
+    print(f"Debug: user_name = {user_name}")  # Debugging output
 
     context = {
         'user_name': user_name,
@@ -346,14 +351,37 @@ def homepage(request):
     request.session['just_logged_in'] = False
 
     return render(request, 'KwentasApp/homepage.html', context)
-
 def forgotpassword(request):
-     if request.method == 'POST':
+    if request.method == 'POST':
         email = request.POST.get('email')
-        code = request.POST.get('code')
-        password = request.POST.get('password')
-        password2 = request.POST.get('password2')
-     return render(request, 'KwentasApp/forgot-password.html')
+
+        # Check if email exists in the database
+        try:
+            user = CustomUser.objects.get(email=email)
+        except ObjectDoesNotExist:
+            # Added: Stop execution if the email is not registered
+            messages.error(request, 'Email not found.')
+            return redirect('forgotpassword') 
+        # Generate a 6-digit OTP
+        code = ''.join(random.choices('0123456789', k=6))
+
+        # Save OTP and email in session
+        request.session['verification_code'] = code
+        request.session['reset_email'] = email
+
+        # Send verification code to the email
+        send_mail(
+            'Password Reset Code',
+            f'Your verification code is: {code}',
+            'kwentasklarasboljoon@gmail.com',
+            [email],
+            fail_silently=False,
+        )
+
+        messages.success(request, 'Verification code sent to your email.')
+        return redirect('verify_password_reset')
+
+    return render(request, 'KwentasApp/forgot-password.html')
     
 @csrf_exempt
 def verify_and_change_password(request):
@@ -366,37 +394,37 @@ def verify_and_change_password(request):
             stored_code = request.session.get('verification_code')
 
             logger.info(f'Received request to change password for {email}')
-            logger.info(f'Stored code: {stored_code}, Session email: {request.session.get("email")}')
+            logger.info(f'Stored code: {stored_code}, Session email: {request.session.get("reset_email")}')
 
-            if code and code == stored_code and email == request.session.get('email'):
-                try:
-                    user = CustomUser.objects.get(email=email)
-                    hashed_password = make_password(password)
-                    user.password = hashed_password
-                    user.save()
+            # Ensure email exists before proceeding
+            try:
+                user = CustomUser.objects.get(email=email)  # Added: Ensure the email exists in the database
+            except CustomUser.DoesNotExist:
+                logger.error(f'User not found for email: {email}')
+                return JsonResponse({'success': False, 'error': 'User not found'}, status=404)  # Added: Return error if user is not found
 
-                    # Log the user password hash
-                    logger.info(f'Password hash for user {email}: {hashed_password}')
+            # Check if OTP matches and email is correct
+            if code and code == stored_code and email == request.session.get('reset_email'):
+                hashed_password = make_password(password)
+                user.password = hashed_password
+                user.save()
 
-                    # Clear the session data
-                    del request.session['verification_code']
-                    del request.session['email']
+                # Log successful password change
+                logger.info(f'Password changed for user: {email}')
 
-                    # Log successful password change
-                    logger.info(f'Password changed for user: {email}')
+                # Clear session data
+                del request.session['verification_code']
+                del request.session['reset_email']
 
-                    # Attempt to log in the user with the new password
-                    user = authenticate(username=user.username, password=password)
-                    if user is not None:
-                        login(request, user)
-                        logger.info(f'User {email} logged in successfully after password change.')
-                        return JsonResponse({'success': True})
-                    else:
-                        logger.error(f'Authentication failed for user after password change: {email}')
-                        return JsonResponse({'success': False, 'error': 'Authentication failed after password change'}, status=400)
-                except CustomUser.DoesNotExist:
-                    logger.error(f'User not found for email: {email}')
-                    return JsonResponse({'success': False, 'error': 'User not found'}, status=404)
+                # Attempt to log in the user with the new password
+                user = authenticate(username=user.username, password=password)
+                if user is not None:
+                    login(request, user)
+                    logger.info(f'User {email} logged in successfully after password change.')
+                    return JsonResponse({'success': True})
+                else:
+                    logger.error(f'Authentication failed for user after password change: {email}')
+                    return JsonResponse({'success': False, 'error': 'Authentication failed after password change'}, status=400)
 
             logger.warning(f'Invalid code or email mismatch for user: {email}')
             return JsonResponse({'success': False, 'error': 'Invalid code or email mismatch'}, status=400)
@@ -410,7 +438,6 @@ def verify_and_change_password(request):
 
     logger.warning('Invalid request method for password change.')
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
-    
 
 @login_required
 def generate_qr_code(request):

@@ -10,7 +10,7 @@ firebase_config = {
     "storageBucket": "test-24ea0.appspot.com",
     "messagingSenderId": "811829331453",
     "appId": "1:811829331453:web:12930831feba2f3a098594",
-    "measurementId": "G-5EQ2SMHDSY"
+    "measurementId": "G-5EQ2SMHDSY" 
 }
 
 try:
