@@ -216,7 +216,6 @@ def base_view(request):
 
 def is_superuser(user):
     return user.is_authenticated and user.is_superuser
-
 @csrf_exempt
 def send_verification_code(request):
     if request.method == 'POST':
@@ -224,14 +223,11 @@ def send_verification_code(request):
             data = json.loads(request.body)
             email = data.get('email')
 
-            # Check if email exists in the database
-            try:
-                user = CustomUser.objects.get(email=email)
-            except CustomUser.DoesNotExist:
-                logger.warning(f'Attempt to reset password for non-existent email: {email}')
-                return JsonResponse({'success': False, 'error': 'Email not found'}, status=404)  # Prevents sending OTP to unregistered users
+            # ✅ Check if the email is already registered
+            if CustomUser.objects.filter(email=email).exists():
+                return JsonResponse({'success': False, 'error': 'This email is already registered!'}, status=400)
 
-            # Generate a 6-digit numeric verification code
+            # ✅ Generate a 6-digit numeric verification code
             code = ''.join(random.choices('0123456789', k=6))
             subject = 'Your Verification Code'
             text_content = f'Your verification code is: {code}'
@@ -247,7 +243,7 @@ def send_verification_code(request):
                 msg.attach_alternative(html_content, "text/html")
                 msg.send()
 
-                # Store the verification code and email in session
+                # ✅ Store the verification code and email in session
                 request.session['verification_code'] = code
                 request.session['email'] = email
                 logger.info(f'Sent verification code to {email}')
