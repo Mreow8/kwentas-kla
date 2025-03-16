@@ -24,21 +24,32 @@
       type="text/css"
       href="{% static 'KwentasApp/css/graphs.css' %}"
     />
+    <style>
+      #sidebar {
+        display: block !important;
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+      }
+    </style>
   </head>
   <body>
     <div class="grid-container">
       <!-- Header -->
       <header class="header">
         <div class="menu-icon" onclick="openSidebar()">
-          <span class="material-icons-outlined">menu</span>
+          <span class="material-icons-outlined" style="cursor: pointer"
+            >menu</span
+          >
         </div>
       </header>
       <!-- End Header -->
 
       <!-- Sidebar -->
       <aside
-        class="fixed inset-y-0 left-0 z-50 w-64 transition-transform duration-300 transform md:translate-x-0 -translate-x-full bg-white dark:bg-gray-800 shadow-md"
         id="sidebar"
+        class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-md transition-transform duration-300 ease-in-out transform -translate-x-full"
       >
         <div class="p-4 h-full overflow-y-auto">
           <div class="flex items-center">
@@ -166,6 +177,32 @@
 
     <script>
       // Function to show the selected section and hide others
+
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.toggle("-translate-x-full");
+      }
+
+      function closeSidebar(event) {
+        const sidebar = document.getElementById("sidebar");
+        const menuIcon = document.querySelector(".menu-icon");
+
+        // Check if the clicked element is outside the sidebar and not the menu icon
+        if (
+          !sidebar.contains(event.target) &&
+          !menuIcon.contains(event.target)
+        ) {
+          sidebar.classList.add("-translate-x-full");
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .querySelector(".menu-icon")
+          .addEventListener("click", toggleSidebar);
+        document.addEventListener("click", closeSidebar);
+      });
+
       function showSection(sectionId) {
         // List of all section IDs
         const sections = ["comparison", "utilization", "spent", "department"];
