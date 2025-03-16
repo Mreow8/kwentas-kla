@@ -217,6 +217,49 @@ def base_view(request):
 def is_superuser(user):
     return user.is_authenticated and user.is_superuser
 @csrf_exempt
+def send_reset_code(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            email = data.get('email')
+
+
+            if not CustomUser.objects.filter(email=email).exists():
+                return JsonResponse({'success': False, 'error': 'Email not found!'}, status=404)
+
+            # ✅ Generate a 6-digit reset code
+            code = ''.join(random.choices('0123456789', k=6))
+            subject = 'Your Verification Code'
+            text_content = f'Your verification code is: {code}'
+
+            try:
+                html_content = render_to_string('KwentasApp/verification_email.html', {'code': code})
+            except Exception as e:
+                logger.error(f'Error rendering email template: {str(e)}')
+                return JsonResponse({'success': False, 'error': 'Error rendering email template.'}, status=500)
+
+            try:
+                msg = EmailMultiAlternatives(subject, text_content, 'kwentasklarasboljoon@gmail.com', [email])
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
+
+                # ✅ Store the verification code and email in session
+                request.session['verification_code'] = code
+                request.session['email'] = email
+                logger.info(f'Sent verification code to {email}')
+                return JsonResponse({'success': True})
+            except Exception as e:
+                logger.error(f'Error sending email to {email}: {str(e)}')
+                return JsonResponse({'success': False, 'error': 'Error sending email.'}, status=500)
+
+        except json.JSONDecodeError:
+            logger.warning('Invalid JSON format received in send_verification_code.')
+            return JsonResponse({'success': False, 'error': 'Invalid JSON format.'}, status=400)
+
+    logger.warning('Invalid request method for sending verification code.')
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
+@csrf_exempt
 def send_verification_code(request):
     if request.method == 'POST':
         try:
