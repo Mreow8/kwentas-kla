@@ -25,6 +25,13 @@
       href="{% static 'KwentasApp/css/graphs.css' %}"
     />
     <style>
+      @media (min-width: 1024px) {
+        /* Adjust breakpoint if needed */
+        #sidebar {
+          transform: translateX(0) !important; /* Ensure it's visible */
+        }
+      }
+
       #sidebar {
         display: block !important;
         position: fixed;
@@ -180,7 +187,10 @@
 
       function toggleSidebar() {
         const sidebar = document.getElementById("sidebar");
-        sidebar.classList.toggle("-translate-x-full");
+        if (window.innerWidth < 1024) {
+          // Adjust breakpoint if needed
+          sidebar.classList.toggle("-translate-x-full");
+        }
       }
 
       function closeSidebar(event) {
