@@ -122,7 +122,7 @@
 
         <li class="mb-2">
           <a
-            href="{% url 'current_projects' %}"
+            href="{% url 'all_projects' %}"
             class="flex items-center p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
           >
             <i class="fas fa-file-pdf mr-2"></i>
@@ -181,3 +181,14 @@
     </nav>
   </div>
 </aside>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+
+    sidebarToggle.addEventListener("click", function () {
+      // Toggle the sidebar by adjusting the 'translate-x-full' class
+      sidebar.classList.toggle("-translate-x-full");
+    });
+  });
+</script>
