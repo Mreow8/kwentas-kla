@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap");
 
 * {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 section {
@@ -21,6 +21,7 @@ section {
 
 .row {
   display: flex;
+  margin-top: 20px;
   flex-wrap: wrap;
 }
 .logo-image {
@@ -61,7 +62,7 @@ p {
 }
 
 .icon-wrapper {
-  background-color: #007FFF            ;
+  background-color: #007fff;
   position: relative;
   margin: auto;
   font-size: 30px;
@@ -75,16 +76,16 @@ p {
 }
 
 .card:hover {
-  transform: translateY(-10px); /* Simple hover animation */
+  transform: translateY(-5px); /* Simple hover animation */
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15); /* Adding shadow on hover */
 }
 
 .card:hover .icon-wrapper {
-  background-color: #007FFF            ; /* Keeping the original background color */
+  background-color: #007fff; /* Keeping the original background color */
   color: #ffffff; /* Keeping the original icon color */
 }
 
-.card:hover h3, 
+.card:hover h3,
 .card:hover p {
   color: #1f194c; /* Keeping the original text color */
 }
@@ -139,17 +140,16 @@ p {
   border-radius: 25px;
   outline: none;
   border: none;
-  background-image: linear-gradient(to right, #007FFF            , #007FFF            , #007FFF            );
+  background-image: linear-gradient(to right, #007fff, #007fff, #007fff);
   background-size: 200%;
-  font-size: 1.0rem;
+  font-size: 1rem;
   color: #ffffff;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   text-transform: uppercase;
   margin: 1rem auto;
   cursor: pointer;
   transition: 0.5s;
 }
-
 
 .btn:hover {
   transform: scale(1.15); /* Hover scaling effect */
@@ -164,11 +164,11 @@ p {
   border-radius: 25px;
   outline: none;
   border: none;
-  background-image: linear-gradient(to right, #007FFF            , #007FFF            , #007FFF            );
+  background-image: linear-gradient(to right, #007fff, #007fff, #007fff);
   background-size: 200%;
-  font-size: 1.0rem;
+  font-size: 1rem;
   color: #ffffff;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   text-transform: uppercase;
   margin: 1rem auto;
   cursor: pointer;
@@ -180,12 +180,12 @@ p {
 }
 
 :root {
-  --dark: #34495E;
+  --dark: #34495e;
   --light: #ffffff;
-  --success: #0ABF30;
-  --error: #E24D4C;
-  --warning: #E9BD0C;
-  --info: #3498DB;
+  --success: #0abf30;
+  --error: #e24d4c;
+  --warning: #e9bd0c;
+  --info: #3498db;
 }
 
 body {
@@ -261,7 +261,6 @@ body.page-loaded {
   animation: reloadAnimation 2s linear infinite;
 }
 
-
 /* Base Navbar Styles */
 .navbar {
   display: flex;
@@ -270,14 +269,15 @@ body.page-loaded {
   align-items: center;
   padding: 0.75rem 2rem; /* Default padding for the navbar */
   border-radius: 10px; /* Rounded corners */
-  background-color: #007FFF            ; /* Adjust background color as needed */
+  background-color: #007fff; /* Adjust background color as needed */
   color: #fff; /* Adjust text color as needed */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
   position: relative; /* Ensure positioning context for the mobile menu */
 }
 
 /* Navbar Left and Right Styles */
-.navbar-left, .navbar-right {
+.navbar-left,
+.navbar-right {
   display: flex;
   align-items: center;
 }
@@ -291,7 +291,7 @@ body.page-loaded {
 .navbar-left span {
   font-size: 25px; /* Adjust size as needed */
   font-weight: bold; /* Makes text bold */
-  font-family: 'Poppins', sans-serif; /* Choose a heavier font family if needed */
+  font-family: "Poppins", sans-serif; /* Choose a heavier font family if needed */
 }
 
 .navbar-right {
@@ -308,7 +308,7 @@ body.page-loaded {
 
 .logged-in {
   font-size: 18px;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   margin: 0;
   color: white;
 }
@@ -357,7 +357,7 @@ body.page-loaded {
 
   /* Hamburger Menu Icon */
   .navbar-toggler::before {
-    content: '☰'; /* Hamburger icon */
+    content: "☰"; /* Hamburger icon */
   }
 }
 
@@ -368,21 +368,18 @@ body.page-loaded {
   }
 }
 
-
-
-
 .custom-toast-container {
   margin-right: 60px;
 }
 
 @media (max-width: 480px) {
   .custom-toast-container {
-      /* Move the toast up on small screens */
-      top: 30%;  /* Adjust this value to move the toast higher */
-      left: 50%;
-      transform: translate(-50%, -30%);  /* Adjust this value accordingly */
-      max-width: 100%;
-      font-size: 14px;
+    /* Move the toast up on small screens */
+    top: 30%; /* Adjust this value to move the toast higher */
+    left: 50%;
+    transform: translate(-50%, -30%); /* Adjust this value accordingly */
+    max-width: 100%;
+    font-size: 14px;
   }
 }
 
@@ -405,18 +402,19 @@ body.page-loaded {
 }
 
 /* Button Styles (account and dropdown toggle) */
-.account, .dropdown-toggle {
+.account,
+.dropdown-toggle {
   display: block;
   width: 100%; /* Full width within the container */
   max-width: 250px; /* Set a wider max width for buttons */
   border-radius: 25px;
   outline: none;
   border: none;
-  background-image: linear-gradient(to right, #007FFF            , #007FFF            , #007FFF            );
+  background-image: linear-gradient(to right, #007fff, #007fff, #007fff);
   background-size: 200%;
-  font-size: 1.0rem;
+  font-size: 1rem;
   color: #ffffff;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   text-transform: uppercase;
   cursor: pointer;
   transition: 0.5s;
@@ -454,9 +452,9 @@ body.page-loaded {
   text-align: left;
   align-items: left;
   margin-right: 500px;
-  font-size: 1.0rem;
+  font-size: 1rem;
   text-wrap: nowrap;
-  color: #007FFF            ;
+  color: #007fff;
   text-decoration: none;
   border: none;
   background: none;
@@ -478,12 +476,13 @@ body.page-loaded {
     gap: 10px; /* Adjust gap for smaller screens */
   }
 
-  .account, .dropdown-toggle {
+  .account,
+  .dropdown-toggle {
     max-width: 100%; /* Buttons take full width on smaller screens */
   }
 
   .dropdown-menu {
-    text-wrap:wrap;
+    text-wrap: wrap;
     width: 110%; /* Full width dropdown menu on smaller screens */
   }
 }
@@ -491,13 +490,13 @@ body.page-loaded {
 /* Target Notyf container for all notifications */
 .notyf {
   right: 60px !important; /* Moves the notification further to the left */
-  top: 20px !important;    
+  top: 20px !important;
 }
 
 /* Mobile and Tablet View: Positioning the notification at the very top */
 @media (max-width: 768px) {
   .mobile-top-notyf .notyf__toast {
-      top: 0 !important; /* Override any existing 'top' values */
+    top: 0 !important; /* Override any existing 'top' values */
   }
 }
 
@@ -514,7 +513,12 @@ body.page-loaded {
   left: 0;
   width: 100vw; /* Use viewport width */
   height: 100vh; /* Use viewport height */
-  background: rgba(255, 255, 255, 0.8); /* Slightly transparent white background */
+  background: rgba(
+    255,
+    255,
+    255,
+    0.8
+  ); /* Slightly transparent white background */
   backdrop-filter: blur(10px); /* Apply background blur */
   display: flex;
   flex-direction: column; /* Stack items vertically */
@@ -533,8 +537,12 @@ body.page-loaded {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Loading text styles */
@@ -557,25 +565,8 @@ body.page-loaded {
     height: 60px; /* Larger size for mobile */
     border-width: 8px; /* Thinner border for mobile */
   }
-  
+
   .loading-text {
     font-size: 16px; /* Smaller font size for mobile */
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

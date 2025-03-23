@@ -378,7 +378,9 @@ def homepage(request):
         messages.error(request, 'You must verify the OTP to access the homepage.')
         return redirect('verify_otp')
 
-    user_name = request.user.name if request.user.is_authenticated else "Guest"
+    user_name = request.user.username if request.user.is_authenticated else "Guest"
+
+
     print(f"Debug: user_name = {user_name}")  # Debugging output
 
     context = {
