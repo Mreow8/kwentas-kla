@@ -15,19 +15,40 @@
   </head>
   <body>
     <div class="overlay" id="overlay"></div>
-    <main class="table{% if not request.user.is_superuser %} non-superuser{% endif %}" id="customers_table">
-      <section class="table__header">
-          <h1>Generate Project Reports</h1>
-          <div class="input-group">
-              <form method="GET" action="{% url 'search_projects' 'continuing' %}">
-                  <input type="text" name="query" placeholder="Search Continuing Projects...">
-                  <div class="export__file">
-                      <button type="submit" class="search">Search</button>
-                  </div>
-              </form>
-          </div>
-      </section>
-      <section class="table__body">
+    <div class="flex h-screen">
+
+      {% include 'KwentasApp/partials/aside.html' %}
+  
+      <main class="flex-1 transition-margin duration-300 ml-0 md:ml-64 min-h-screen bg-gray-100 dark:bg-gray-900{% if not request.user.is_superuser %} non-superuser{% endif %}" id="customers_table">
+        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg mt-3 p-3 sm:p-4 md:p-6 flex flex-col justify-between min-h-[90vh] w-full">
+
+        <div class="p-2 sm:p-4 md:p-8 w-full max-w-[100vw] overflow-hidden">
+          <div class="mb-4">
+            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">Generate Project Reports</h1>
+            
+          
+        </div>
+   <!-- Search -->
+   <div class="relative col-span-1 md:col-span-2 w-full">
+    <form method="GET" action="{% url 'search_projects' 'continuing' %}" class="w-full">
+        <div class="relative">
+            <input type="text" 
+                   id="search-input" 
+                   name="query" 
+                   class="w-full pl-10 pr-4 py-2.5 text-gray-700 bg-white border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-sm hover:border-gray-400 transition-colors duration-200"
+                   placeholder="Search Continuing Projects...">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+        </div>
+    </form>
+    
+    <div id="search-results"></div>
+</div>
+</div>
+<div class="mb-4 sm:mb-6 flex-grow overflow-hidden">
         <form id="bulk-download-form" method="POST" action="{% url 'bulk_download_xlsx' %}">
           {% csrf_token %}
           <table class="table">
@@ -89,7 +110,7 @@
               </div>
           {% endif %}
       </form>
-      </section>
+    </div>
       {% if not request.user.is_superuser %}
           <style>
               .left-align {
@@ -126,6 +147,7 @@
           </ul>
       </div>
   </main>
+    </div>
     <!-- DETAILS  -->
     <div class="details" id="details">
       <a href="{% url 'all_projects' %}">
@@ -448,7 +470,7 @@
         </form>
         
       </div>
-    </div>
+ </div>
     <!------------------------------------------------------ JAVASCRIPT-------------------------------------------------->
     <!-- PIE CHART JS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
