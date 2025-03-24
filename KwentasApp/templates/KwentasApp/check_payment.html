@@ -1,4 +1,4 @@
-{% load humanize %} {% load static %}
+{% load humanize %} {% load static tailwind_tags %}
 <!DOCTYPE html>
 <html lang="en"> {% csrf_token %} <head>
     <meta charset="UTF-8">
@@ -6,16 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Check Payment</title>
+    
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'KwentasApp/css/check.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'KwentasApp/css/continuing.css' %}">
+    {% tailwind_css %}
   </head>
   <body>
     <div class="overlay" id="overlay"></div>
     <div class="flex h-screen">
-    {% include 'KwentasApp/partials/aside.html' %}
+   
+      {% include 'KwentasApp/partials/aside.html' %}
 
     <main class="flex-1 transition-margin duration-300 ml-0 md:ml-64 min-h-screen bg-gray-100 dark:bg-gray-900{% if not request.user.is_superuser %} non-superuser{% endif %}" id="customers_table">
       <div class="p-2 sm:p-4 md:p-8 w-full max-w-[100vw] overflow-hidden">
@@ -130,37 +135,61 @@
           }
         </style>
       {% endif %}
-    
-      <div class="pagination">
-        <ul class="pagination-list">
-          {% if page_obj.has_previous %}
-            <li class="pagination-item"><a href="{% url 'disbursements' %}?{% if query %}query={{ query }}&{% endif %}page=1">&laquo; First</a></li>
-            <li class="pagination-item"><a href="{% url 'disbursements' %}?{% if query %}query={{ query }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a></li>
-          {% else %}
-            <li class="pagination-item disabled"><span>&laquo; First</span></li>
-            <li class="pagination-item disabled"><span>Previous</span></li>
-          {% endif %}
-      
-          <li class="pagination-item active"><span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
-      
-          {% if page_obj.has_next %}
-            <li class="pagination-item"><a href="{% url 'disbursements' %}?{% if query %}query={{ query }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a></li>
-            <li class="pagination-item"><a href="{% url 'disbursements' %}?{% if query %}query={{ query }}&{% endif %}page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
-          {% else %}
-            <li class="pagination-item disabled"><span>Next</span></li>
-            <li class="pagination-item disabled"><span>Last &raquo;</span></li>
-          {% endif %}
-        </ul>
-      </div>
-      
-    
-      <div class="back">
-        <a href="{% url 'homepage' %}">
-          <button class="back-btn">Back</button>
-        </a>
-      </div>
-    </main>
-    </div>
+    <!-- Pagination Controls -->
+<div class="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+  <!-- Back Button -->
+  <div class="w-full sm:w-auto order-2 sm:order-1">
+      <a href="{% url 'homepage' %}" 
+         class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          Back to Homepage
+      </a>
+  </div>
+
+  <!-- Pagination -->
+  <nav class="w-full sm:w-auto order-1 sm:order-2">
+    <ul class="flex items-center justify-center sm:justify-end -space-x-px">
+        {% if page_obj.has_previous %}
+            <li>
+                <a href="{% url 'disbursements' %}?{% if query %}query={{ query }}&{% endif %}page=1" 
+                   class="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                    « First
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'disbursements' %}?{% if query %}query={{ query }}&{% endif %}page={{ page_obj.previous_page_number }}" 
+                   class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                    Previous
+                </a>
+            </li>
+        {% endif %}
+
+        <li>
+            <span class="px-3 py-2 leading-tight text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+            <li>
+                <a href="{% url 'disbursements' %}?{% if query %}query={{ query }}&{% endif %}page={{ page_obj.next_page_number }}" 
+                   class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                    Next
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'disbursements' %}?{% if query %}query={{ query }}&{% endif %}page={{ page_obj.paginator.num_pages }}" 
+                   class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                    Last »
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+  </nav>
+</div>
+
     <!-- DETAILS  -->
     <div class="details" id="details">
       <a href="{% url 'check_payment' %}">

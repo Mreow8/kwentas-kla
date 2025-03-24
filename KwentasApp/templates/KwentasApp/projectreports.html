@@ -1,4 +1,4 @@
-{% load humanize %} {% load static %}
+{% load humanize %} {% load static tailwind_tags %}
 <!DOCTYPE html>
 <html lang="en"> {% csrf_token %} <head>
     <meta charset="UTF-8">
@@ -6,15 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Monitoring & Evaluation</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'KwentasApp/css/continuing.css' %}">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://kit.fontawesome.com/a81368914c.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    {% tailwind_css %}    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'KwentasApp/css/projreports.css' %}">
   </head>
   <body>
-    <div class="overlay" id="overlay"></div>
+       <div class="overlay" id="overlay"></div>
     <div class="flex h-screen">
 
       {% include 'KwentasApp/partials/aside.html' %}
@@ -30,6 +32,7 @@
         </div>
    <!-- Search -->
    <div class="relative col-span-1 md:col-span-2 w-full">
+    
     <form method="GET" action="{% url 'search_projects' 'continuing' %}" class="w-full">
         <div class="relative">
             <input type="text" 
@@ -47,7 +50,9 @@
     
     <div id="search-results"></div>
 </div>
+
 </div>
+
 <div class="mb-4 sm:mb-6 flex-grow overflow-hidden">
         <form id="bulk-download-form" method="POST" action="{% url 'bulk_download_xlsx' %}">
           {% csrf_token %}
@@ -146,8 +151,9 @@
               {% endif %}
           </ul>
       </div>
-  </main>
+    </main>
     </div>
+    
     <!-- DETAILS  -->
     <div class="details" id="details">
       <a href="{% url 'all_projects' %}">
@@ -471,6 +477,7 @@
         
       </div>
  </div>
+ 
     <!------------------------------------------------------ JAVASCRIPT-------------------------------------------------->
     <!-- PIE CHART JS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
