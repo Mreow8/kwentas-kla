@@ -1,3 +1,8 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
 # Python
 __pycache__/
 *.py[cod]
@@ -29,7 +34,7 @@ media/
 staticfiles/
 staticfiles_backup/
 
-# Environment variables
+# Environment
 .env
 .env.production
 .env.local
@@ -68,18 +73,13 @@ coverage.xml
 *.py,cover
 .hypothesis/
 
-# Distribution / packaging
-.Python
+# Virtual Environment
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
 .python-version
-
-# Database
-*.sqlite3
-*.db
 
 # Logs
 logs/
@@ -98,7 +98,35 @@ maintainance_mode_state.txt
 *.swp
 *~
 
-# Project specific
-staticfiles_backup/
-staticfiles/
-media/
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Cloud
+.gcloudignore
+gcloudignore
+
+# Cloud Run specific
+.gcloudignore
+gcloudignore
+.cloudignore
+.cloudignore.yaml
+.cloudignore.yml
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Large files
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# Backup files
+*.bak
+*.backup
+*~ 

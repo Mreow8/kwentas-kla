@@ -1,0 +1,249 @@
+name: TPO-Portal Backend Deployment
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: tpo-portal-be-fe
+  SERVICE_NAME: tpo-backend
+  REGION: us-west1
+  ARTIFACT_REGISTRY: us-west1-docker.pkg.dev/tpo-portal-be-fe/tpo-backend
+    
+jobs:
+  deploy:
+    name: TPO-Portal Backend Deployment
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up service account permissions
+        run: |
+          # Grant necessary permissions to the service account
+          gcloud projects add-iam-policy-binding ${{ env.PROJECT_ID }} \
+            --member="serviceAccount:383992099278-compute@developer.gserviceaccount.com" \
+            --role="roles/run.admin"
+          
+          gcloud projects add-iam-policy-binding ${{ env.PROJECT_ID }} \
+            --member="serviceAccount:383992099278-compute@developer.gserviceaccount.com" \
+            --role="roles/iam.serviceAccountUser"
+          
+          gcloud projects add-iam-policy-binding ${{ env.PROJECT_ID }} \
+            --member="serviceAccount:383992099278-compute@developer.gserviceaccount.com" \
+            --role="roles/artifactregistry.reader"
+
+      - name: Fetch environment variables from Secret Manager
+        id: secrets
+        run: |
+          echo "Fetching environment variables from Secret Manager"
+          
+          # Fetch all environment variables from the single secret
+          ENV_JSON=$(gcloud secrets versions access latest --secret="tpo-backend-stage" --project=${{ env.PROJECT_ID }})
+          
+          # Create .env file from JSON
+          echo "Creating .env file"
+          echo "$ENV_JSON" | jq -r 'to_entries | .[] | .key + "=" + (.value | tostring)' > .env
+          
+          # Set critical environment variables for build process
+          echo "Setting environment variables for build"
+          while IFS='=' read -r key value; do
+            # Variables needed for build process
+            if [[ $key == "NODE_ENV" ]] || \
+               [[ $key == "MONGODB_URI" ]] || \
+               [[ $key == "JWT_SECRET" ]] || \
+               [[ $key == "JWT_EXPIRES_IN" ]] || \
+               [[ $key == "JWT_REFRESH_EXPIRES_IN" ]] || \
+               [[ $key == "OPENAI_API_KEY" ]] || \
+               [[ $key == "AWS_REGION" ]] || \
+               [[ $key == "AWS_ACCESS_KEY_ID" ]] || \
+               [[ $key == "AWS_SECRET_ACCESS_KEY" ]] || \
+               [[ $key == "AWS_COGNITO_ACCESS_KEY_ID" ]] || \
+               [[ $key == "AWS_COGNITO_SECRET_ACCESS_KEY" ]] || \
+               [[ $key == "AWS_COGNITO_REGION" ]] || \
+               [[ $key == "AWS_COGNITO_USER_POOL_ID" ]] || \
+               [[ $key == "AWS_COGNITO_CLIENT_ID" ]] || \
+               [[ $key == "AWS_COGNITO_CLIENT_SECRET" ]] || \
+               [[ $key == "AWS_S3_ACCESS_KEY_ID" ]] || \
+               [[ $key == "AWS_S3_SECRET_ACCESS_KEY" ]] || \
+               [[ $key == "AWS_S3_BUCKET_NAME" ]] || \
+               [[ $key == "AWS_S3_DEFAULT_REGION" ]] || \
+               [[ $key == "RATE_LIMIT_WINDOW_MS" ]] || \
+               [[ $key == "RATE_LIMIT_MAX_REQUESTS" ]] || \
+               [[ $key == "MORTDASH_SCOPE" ]] || \
+               [[ $key == "MORTDASH_CLIENT_ID" ]] || \
+               [[ $key == "MORTDASH_CLIENT_SECRET" ]] || \
+               [[ $key == "CORS_ORIGIN" ]] || \
+               [[ $key == "ALLOWED_ORIGINS" ]] || \
+               [[ $key == "MORTDASH_BASE_URL" ]]; then
+              # Mask sensitive values in GitHub Actions
+              echo "::add-mask::$value"
+              echo "$key=$value" >> $GITHUB_ENV
+              echo "Added masked build variable: $key"
+            fi
+          done < .env
+          
+          # Ensure no sensitive data is logged
+          echo "Environment variables have been set securely"
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Create Artifact Registry repository if not exists
+        run: |
+          if ! gcloud artifacts repositories describe tpo-backend --location=${{ env.REGION }} --project=${{ env.PROJECT_ID }} 2>/dev/null; then
+            echo "Creating Artifact Registry repository..."
+            gcloud artifacts repositories create tpo-backend \
+              --repository-format=docker \
+              --location=${{ env.REGION }} \
+              --project=${{ env.PROJECT_ID }} \
+              --description="Repository for TPO Backend"
+          else
+            echo "Repository already exists"
+          fi
+
+      - name: Generate timestamp for unique version
+        id: timestamp
+        run: echo "timestamp=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ steps.timestamp.outputs.timestamp }} . --no-cache
+          docker push ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ steps.timestamp.outputs.timestamp }}
+
+      - name: Get current traffic allocation
+        id: get-traffic
+        run: |
+          # Check if the service exists and get current revision info
+          if gcloud run services describe ${{ env.SERVICE_NAME }} --region ${{ env.REGION }} 2>/dev/null; then
+            # Get the current active revision
+            CURRENT_REVISION=$(gcloud run services describe ${{ env.SERVICE_NAME }} --region ${{ env.REGION }} --format="value(status.traffic.revisionName)" | head -n 1)
+            echo "Current active revision: $CURRENT_REVISION"
+            
+            # Determine the next tag based on current revision
+            if [[ $CURRENT_REVISION == *"-blue-"* ]]; then
+              echo "current=blue" >> $GITHUB_OUTPUT
+              echo "next=green" >> $GITHUB_OUTPUT
+            else
+              echo "current=green" >> $GITHUB_OUTPUT
+              echo "next=blue" >> $GITHUB_OUTPUT
+            fi
+          else
+            # Service doesn't exist yet, start with blue
+            echo "current=none" >> $GITHUB_OUTPUT
+            echo "next=blue" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy new revision
+        id: deploy
+        run: |
+          # Create env vars string for deployment
+          ENV_VARS=""
+          while IFS='=' read -r key value; do
+            # Skip empty lines, comments, and PORT variable
+            [[ -z "$key" || "$key" == \#* || "$key" == "PORT" ]] && continue
+            ENV_VARS="$ENV_VARS --set-env-vars=$key=$value"
+          done < .env
+
+          # Check if service exists
+          if gcloud run services describe ${{ env.SERVICE_NAME }} --region ${{ env.REGION }} 2>/dev/null; then
+            # Service exists - deploy new revision with no traffic
+            echo "Updating existing service..."
+            gcloud run deploy ${{ env.SERVICE_NAME }} \
+              --image ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ steps.timestamp.outputs.timestamp }} \
+              --region ${{ env.REGION }} \
+              --platform managed \
+              --allow-unauthenticated \
+              --service-account 383992099278-compute@developer.gserviceaccount.com \
+              --tag ${{ steps.get-traffic.outputs.next }} \
+              --no-traffic \
+              --timeout 300 \
+              --cpu=1 \
+              --memory=512Mi \
+              --min-instances=1 \
+              --max-instances=10 \
+              --concurrency=80 \
+              --execution-environment=gen2 \
+              $ENV_VARS
+          else
+            # Service doesn't exist - create new service
+            echo "Creating new service..."
+            gcloud run deploy ${{ env.SERVICE_NAME }} \
+              --image ${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ steps.timestamp.outputs.timestamp }} \
+              --region ${{ env.REGION }} \
+              --platform managed \
+              --allow-unauthenticated \
+              --service-account 383992099278-compute@developer.gserviceaccount.com \
+              --tag ${{ steps.get-traffic.outputs.next }} \
+              --timeout 300 \
+              --cpu=1 \
+              --memory=512Mi \
+              --min-instances=1 \
+              --max-instances=10 \
+              --concurrency=80 \
+              --execution-environment=gen2 \
+              $ENV_VARS
+          fi
+
+      - name: Test new deployment
+        id: test-deployment
+        run: |
+          # Get the URL with the tag parameter
+          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} --region ${{ env.REGION }} --format="value(status.url)")
+          TAG_URL="${SERVICE_URL}?tag=${{ steps.get-traffic.outputs.next }}"
+          
+          echo "Testing URL: $TAG_URL/api/test-connection"
+          
+          # Test the connection endpoint with retries
+          for i in {1..5}; do
+            echo "Attempt $i: Testing connection..."
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$TAG_URL/api/test-connection")
+            
+            if [ "$HTTP_STATUS" -eq 200 ]; then
+              echo "Test successful, proceeding with traffic migration"
+              echo "test_success=true" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            
+            echo "Test failed with status $HTTP_STATUS, retrying in 10 seconds..."
+            sleep 10
+          done
+          
+          echo "All test attempts failed"
+          echo "test_success=false" >> $GITHUB_OUTPUT
+          exit 1
+
+      - name: Migrate traffic to new revision
+        if: steps.test-deployment.outputs.test_success == 'true'
+        run: |
+          gcloud run services update-traffic ${{ env.SERVICE_NAME }} \
+            --region ${{ env.REGION }} \
+            --to-tags ${{ steps.get-traffic.outputs.next }}=100
+
+      - name: Rollback if test failed
+        if: steps.test-deployment.outputs.test_success == 'false'
+        run: |
+          echo "Test failed, keeping traffic on current revision"
+          # We don't need to do anything as the new revision has no traffic
