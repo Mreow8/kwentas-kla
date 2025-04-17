@@ -27,6 +27,17 @@ class CustomUser(AbstractUser):
 from django.conf import settings
 from django.db import models
 
+class UploadedFileData(models.Model):
+    project_code = models.CharField(max_length=100)
+    file_type = models.CharField(max_length=10)  # PPMP / APP / POW
+    file_name = models.CharField(max_length=255)  # Original name
+    file = models.FileField(upload_to='uploads/', null=True, blank=True)
+
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.file_name} - {self.file_type}"
+
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     two_factor_enabled = models.BooleanField(default=False)

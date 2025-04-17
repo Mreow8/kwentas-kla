@@ -5,6 +5,11 @@ from django.contrib.auth import login, logout, authenticate  # Functions for han
 from django.contrib import messages  # Django messages framework for displaying feedback messages to users
 from django.contrib.auth.decorators import login_required, user_passes_test  # Decorators for restricting access to logged-in users or users passing a test
 from django.urls import reverse  # Generates URLs based on view names
+import openpyxl
+from django.shortcuts import redirect
+from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse  # HTTP responses for plain text, redirection, or JSON data
 from django.views.decorators.cache import never_cache  # Prevents caching of the decorated view's response
 from django.views.decorators.csrf import csrf_exempt  # Exempts a view from CSRF protection
@@ -65,11 +70,80 @@ import openpyxl  # Excel file handling
 from django.http import HttpResponse, JsonResponse  # HTTP and JSON responses
 from django.conf import settings  # Accesses Django configuration settings
 from openpyxl.styles import Font, Alignment, Border, Side  # Cell styling for Excel spreadsheets
-
+from .models import UploadedFileData
 logger = logging.getLogger(__name__)  # Initializes logger for tracking events or errors
 print("KwentasApp.views module loaded")  # Debugging print
 
+FILE_TYPE_KEYWORDS = {
+    "PPMP": ["PPMP", "PROJECT PROCUREMENT MANAGEMENT PLAN"],
+    "APP": ["APP", "ANNUAL PROCUREMENT PLAN"],
+    "POW": ["POW", "PROGRAM OF WORKS"]
+}
 
+@csrf_exempt
+def upload_excel(request):
+    if request.method == 'POST':
+        uploaded_file = request.FILES.get('excel_file')
+        selected_type = request.POST.get('file_type')
+        project_code = request.POST.get('project_code')
+
+        if not uploaded_file.name.lower().endswith(('.xlsx', '.xls')):
+            messages.error(request, "Only Excel files are allowed.")
+            return redirect('procurements')
+
+        try:
+            wb = openpyxl.load_workbook(uploaded_file, data_only=True)
+            keywords = FILE_TYPE_KEYWORDS.get(selected_type.upper(), [])
+
+            found = False
+            for sheet in wb.worksheets:
+                for row in sheet.iter_rows(values_only=True):
+                    for cell in row:
+                        if cell is None:
+                            continue
+                        text = str(cell).strip().upper()
+                        if any(keyword in text for keyword in keywords):
+                            found = True
+                            break
+                    if found:
+                        break
+                if found:
+                    break
+
+            if found:
+                # ✅ Save file to DB
+                UploadedFileData.objects.create(
+                    project_code=project_code,
+                    file_type=selected_type,
+                    file=uploaded_file,              # FileField
+                    file_name=uploaded_file.name     # Just original filename
+                )
+                messages.success(request, f"{selected_type} content detected and saved for project {project_code}.")
+            else:
+                messages.error(request, f"No '{selected_type}' or its full form found in the file.")
+
+        except Exception as e:
+            messages.error(request, f"Error reading Excel file: {e}")
+
+    return redirect('procurements')
+def get_uploaded_files(request):
+    project_code = request.GET.get('project_code')
+    
+    if project_code:
+        files = UploadedFileData.objects.filter(project_code=project_code)
+        print(f"Found {len(files)} files for project code {project_code}")  # Debugging print statement
+
+        file_data = [{
+            'file_name': file.file_name,
+            'file_type': file.file_type,
+            'uploaded_at': file.uploaded_at.strftime('%Y-%m-%d %H:%M:%S')
+        } for file in files]
+
+        print(f"Files: {file_data}")  # Debugging print statement
+        
+        return JsonResponse({'files': file_data})
+    else:
+        return JsonResponse({'files': []})
 
 def bulk_download_xlsx(request):
     if request.method == 'POST':

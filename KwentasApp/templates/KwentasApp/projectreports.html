@@ -96,7 +96,7 @@
                                   <td class="year" onclick="showDetails('{{ entry.code }}')">{{ entry.services }}</td>
                                   {% if request.user.is_superuser %}
                                       <td style="text-align: center;">
-                                          <input type="checkbox" name="selected_entries" value="{{ entry.code }}" class="entry-checkbox" style="transform: scale(1.5);">
+                                          <input type="checkbox" name="selected_entries" value="{{ entry.code }}" class="entry-checkbox" style="transform: scale(1.5); box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
                                       </td>
                                   {% endif %}
                               </tr>
@@ -127,30 +127,53 @@
               }
           </style>
       {% endif %}
-      <div class="back">
-          <a href="{% url 'homepage' %}">
-              <button class="back-btn">Back</button>
-          </a>
-      </div>
-      <div class="pagination">
-          <ul class="pagination-list">
-              {% if page_obj.has_previous %}
-                  <li class="pagination-item"><a href="?page=1">&laquo; First</a></li>
-                  <li class="pagination-item"><a href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
-              {% else %}
-                  <li class="pagination-item disabled"><span>&laquo; First</span></li>
-                  <li class="pagination-item disabled"><span>Previous</span></li>
-              {% endif %}
-              <li class="pagination-item active"><span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
-              {% if page_obj.has_next %}
-                  <li class="pagination-item"><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
-                  <li class="pagination-item"><a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
-              {% else %}
-                  <li class="pagination-item disabled"><span>Next</span></li>
-                  <li class="pagination-item disabled"><span>Last &raquo;</span></li>
-              {% endif %}
-          </ul>
-      </div>
+        
+<div class="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+  <!-- Back Button -->
+  <div class="w-full sm:w-auto order-2 sm:order-1">
+      <a href="{% url 'homepage' %}" 
+         class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          Back to Homepage
+      </a>
+  </div>
+<!-- Pagination Controls -->
+<nav class="w-full sm:w-auto order-1 sm:order-2">
+  <ul class="flex items-center justify-center sm:justify-end -space-x-px">
+      {% if page_obj.has_previous %}
+          <li>
+              <a href="?page=1" class="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                  « First
+              </a>
+          </li>
+          <li>
+              <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                  Previous
+              </a>
+          </li>
+      {% endif %}
+
+      <li>
+          <span class="px-3 py-2 leading-tight text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">
+              Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+          </span>
+      </li>
+
+      {% if page_obj.has_next %}
+          <li>
+              <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                  Next
+              </a>
+          </li>
+          <li>
+              <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                  Last »
+              </a>
+          </li>
+      {% endif %}
+  </ul>
     </main>
     </div>
     

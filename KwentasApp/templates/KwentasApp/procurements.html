@@ -1,4 +1,4 @@
-{% load humanize %} {% load static %}
+{% load humanize %} {% load static tailwind_tags %}
 <!DOCTYPE html>
 <html lang="en"> {% csrf_token %} <head>
     <meta charset="UTF-8">
@@ -7,9 +7,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Procurements</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <script src="https://kit.fontawesome.com/a81368914c.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% tailwind_css %}
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'KwentasApp/css/procurements.css' %}">
   </head>
@@ -131,47 +133,46 @@
                           <th scope="col" class="px-6 py-3 text-left font-semibold text-gray-700">Action</th>
                       {% endif %}
                   </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                  {% if matched_entries %}
-                      {% for entry in matched_entries %}
-                          <tr class="hover:bg-gray-100 cursor-pointer">
-                              <td class="px-6 py-4 sm:w-[700px] md:w-[800px] lg:w-[1000px]">{{ entry.ppa }}</td>
-                              <td class="px-6 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.implementing_unit }}</td>
-                              <td class="px-6 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.services }}</td>
-                              <td class="px-6 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.total_budget }}</td>
-                              <td class="px-6 py-4 sm:w-[300px] md:w-[400px] lg:w-[500px]">{{ entry.code }}</td>
-                              <td class="px-6 py-4 sm:w-[350px] md:w-[450px] lg:w-[550px]">{{ entry.remarks }}</td>
-                              {% if request.user.is_superuser or request.user.department == 'BAC Office' %}
-                                  <td class="px-6 py-4">
-                                      <p class="text-blue-500 hover:text-blue-700 cursor-pointer" onclick="showUpdateForm('{{ entry.code }}')">Update</p>
-                                  </td>
-                              {% endif %}
-                          </tr>
-                      {% endfor %}
-                  {% else %}
-                      {% if page_obj %}
-                          {% for entry in page_obj %}
-                              <tr class="hover:bg-gray-100 cursor-pointer">
-                                  <td class="px-8 py-4 sm:w-[700px] md:w-[800px] lg:w-[1000px]">{{ entry.ppa }}</td>
-                                  <td class="px-8 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.implementing_unit }}</td>
-                                  <td class="px-8 py-4 sm:w-[300px] md:w-[400px] lg:w-[500px]">{{ entry.code }}</td>
-                                  <td class="px-8 py-4 sm:w-[350px] md:w-[450px] lg:w-[550px]">{{ entry.remarks }}</td>
-                                  {% if request.user.is_superuser or request.user.department == 'BAC Office' %}
-                                      <td class="px-8 py-4">
-                                          <p class="text-blue-500 hover:text-blue-700 cursor-pointer" onclick="showUpdateForm('{{ entry.code }}')">Update</p>
-                                      </td>
-                                  {% endif %}
-                              </tr>
-                          {% endfor %}
-                      {% else %}
-                          <tr>
-                              <td colspan="5" class="px-8 py-4 text-center text-gray-500">No projects found.</td>
-                          </tr>
-                      {% endif %}
-                  {% endif %}
-              </tbody>
-          </table>
+              </thead><tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                {% if matched_entries %}
+                    {% for entry in matched_entries %}
+                        <tr class="hover:bg-gray-100 cursor-pointer" onclick="showUploadedFiles('{{ entry.ppa }}', '{{ entry.code }}')">
+                            <td class="px-6 py-4 sm:w-[700px] md:w-[800px] lg:w-[1000px]">{{ entry.ppa }}</td>
+                            <td class="px-6 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.implementing_unit }}</td>
+                            <td class="px-6 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.services }}</td>
+                            <td class="px-6 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.total_budget }}</td>
+                            <td class="px-6 py-4 sm:w-[300px] md:w-[400px] lg:w-[500px]">{{ entry.code }}</td>
+                            <td class="px-6 py-4 sm:w-[350px] md:w-[450px] lg:w-[550px]">{{ entry.remarks }}</td>
+                            {% if request.user.is_superuser or request.user.department == 'BAC Office' %}
+                                <td class="px-6 py-4">
+                                    <p class="text-blue-500 hover:text-blue-700 cursor-pointer" onclick="showUpdateForm('{{ entry.code }}')">Update</p>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    {% if page_obj %}
+                        {% for entry in page_obj %}
+                            <tr class="hover:bg-gray-100 cursor-pointer" onclick="showUploadedFiles('{{ entry.ppa }}', '{{ entry.code }}')">
+                                <td class="px-8 py-4 sm:w-[700px] md:w-[800px] lg:w-[1000px]">{{ entry.ppa }}</td>
+                                <td class="px-8 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.implementing_unit }}</td>
+                                <td class="px-8 py-4 sm:w-[300px] md:w-[400px] lg:w-[500px]">{{ entry.code }}</td>
+                                <td class="px-8 py-4 sm:w-[350px] md:w-[450px] lg:w-[550px]">{{ entry.remarks }}</td>
+                                {% if request.user.is_superuser or request.user.department == 'BAC Office' %}
+                                    <td class="px-8 py-4">
+                                        <p class="text-blue-500 hover:text-blue-700 cursor-pointer" onclick="showUpdateForm('{{ entry.code }}')">Update</p>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="px-8 py-4 text-center text-gray-500">No projects found.</td>
+                        </tr>
+                    {% endif %}
+                {% endif %}
+            </tbody>
+                  </table>
       </div>
   </div>
     
@@ -226,161 +227,40 @@
 
     <!-- DETAILS  -->
     <div class="details" id="details">
-      <a href="{% url 'procurements' %}">
-        <i class="material-icons x" id="exit">close</i>
+      <a href="?project_code={{ entry.code }}">  <!-- Add project_code as query parameter -->
+          <i class="material-icons x" id="exit">close</i>
       </a>
-      <a href="{% url 'procurements' %}">
-        <h1 class="form-title">PROJECT DETAILS</h1>
+      <a href="?project_code={{ entry.code }}">  <!-- Same here -->
+          <h1 class="form-title">PROJECT DETAILS</h1>
       </a>
-      <ul> {% for entry in all_entries %} <li class="entry-item" id="details-{{ entry.code }}" style="display: none;">
-          <div class="details-container">
-            <div class="main-user-info" id="main-detail">
-              <div class="user-input-box">
-                <p class="label">PPA</p>
-                <p id="fullName" class="user-text">{{ entry.ppa }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Implementing Unit</p>
-                <p id="username" class="user-text">{{ entry.implementing_unit }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Location</p>
-                <p id="email" class="user-text">{{ entry.location }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Appropriation</p>
-                <p id="phoneNumber" class="user-text">₱{{ entry.appropriation|intcomma }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Remarks</p>
-                <p id="password" class="user-text">{{ entry.remarks }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Start Date</p>
-                <p id="confirmPassword" class="user-text">{{ entry.start_date }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">End Date</p>
-                <p id="endDate" class="user-text">{{ entry.end_date }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Code</p>
-                <p id="code" class="user-text">{{ entry.code }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Services</p>
-                <p id="services" class="user-text">{{ entry.services }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Year</p>
-                <p id="year" class="user-text">{{ entry.year }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Total Budget</p>
-                <p id="totalBudget" class="user-text">₱{{ entry.overall_budget|intcomma }}</p>
-              </div>
-             
-              <div class="user-input-box">
-                <p class="label">Total Added Budget</p>
-                <p id="totalSpent" class="user-text">₱{{ entry.added_budget|intcomma }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Remaining Balance</p>
-                <p id="remainingBalance" class="user-text">₱{{ entry.remaining_total_balance|intcomma }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Remaining Obligation</p>
-                <p id="remainingObligations" class="user-text">₱{{ entry.remaining_obligations|intcomma }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Total Obligation</p>
-                <p id="totalObligations" class="user-text">₱{{ entry.total_obligations|intcomma }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Total Spent</p>
-                <p id="totalAddedBudget" class="user-text">₱{{ entry.total_disbursements|intcomma }}</p>
-              </div>
-            </div>
-            
-            <div class="chart-container" data-entry-code="{{ entry.code }}" id="chart">
-              <div class="user-input-box">
-                <p class="label">Utilization Rate: </p>
-                <span class="utilizationRate">{{ entry.utilization_rate|floatformat:"-2" }} %</span>
-              </div>
-              <canvas class="pie-chart"></canvas>
-            </div>
-          </div>
-          <div class="tables-container">
-            <div class="table-box">
-              <span class="table-title">Added Budget</span>
-              <div class="table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Amount</th>
-                      <th>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody> {% for budget in entry.budget_data %} <tr>
-                      <td>{{ budget.name|intcomma }}</td>
-                      <td>₱{{ budget.added_budget|intcomma }}</td>
-                      <td>{{ budget.date }}</td>
-                    </tr> {% endfor %} </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="table-box">
-              <span class="table-title">Added Obligation</span>
-              <br>
-              <div class="table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Amount</th>
-                      <th>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody> {% for obligation in entry.obligation %} <tr>
-                      <td>{{ obligation.name }}</td>
-                      <td>₱{{ obligation.obligation|intcomma }}</td>
-                      <td>{{ obligation.date}}</td>
-                    </tr> {% endfor %} </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="table-box">
-              <span class="table-title">Added Disbursement</span>
-              <br>
-              <div class="table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Amount</th>
-                      <th>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody> {% for disbursement in entry.disbursement %} <tr>
-                      <td>{{ disbursement.name }}</td>
-                      <td>₱{{ disbursement.disbursement|intcomma }}</td>
-                      <td>{{ disbursement.date}}</td>
-                    </tr> {% endfor %} </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </li> {% endfor %} </ul>
-    </div>
-
+     
+    
+  </div>
+     
      <!-- UPDATE  -->
-    <div class="details" id="update">
-        {% for entry in all_entries %}
-        <form id="updateForm_{{ entry.code }}" action="{% url 'update_entry' 'procurements' %}" onsubmit="handleSubmit(event)" method="post">
+     <div class="details" id="update">
+      <!-- New Form for File Upload Above Update Form -->
+      <form method="POST" enctype="multipart/form-data" action="{% url 'upload_excel' %}">
+          {% csrf_token %}
+          <input type="file" name="excel_file" required>
+          <input type="text" name="project_code" value="{{ entry.code }}" hidden>
+
+  
+          <label for="file_type">File Type:</label>
+          <select name="file_type" required>
+              <option value="PPMP">PPMP</option>
+              <option value="APP">APP</option>
+              <option value="POW">POW</option>
+          </select>
+  
+          <button type="submit">Upload</button>
+      </form>
+  
+      {% for entry in all_entries %}
+      <form id="updateForm_{{ entry.code }}" action="{% url 'update_entry' 'procurements' %}" onsubmit="handleSubmit(event)" method="post">
           {% csrf_token %}
           <input type="hidden" name="entry_code" value="{{ entry.code }}">
-          
+  
           <!-- Hidden Fields for Other Data -->
           <input type="hidden" name="ppa" value="{{ entry.ppa }}">
           <input type="hidden" name="implementing_unit" value="{{ entry.implementing_unit }}">
@@ -390,30 +270,33 @@
           <input type="hidden" name="code" value="{{ entry.code }}">
           <input type="hidden" name="services" value="{{ entry.services }}">
           <input type="hidden" name="year" value="{{ entry.year }}">
-      
+  
           <!-- Visible Field for Remarks -->
           <div class="user-input-box" style="display: flex; flex-direction: column; align-items: center;">
-            <label for="remarks_{{ entry.code }}">Remarks</label>
-            <select id="remarks_{{ entry.code }}" name="remarks" class="user-input" style="text-align: center; text-align-last: center;">
-              <option value="" disabled selected>{{ entry.remarks }}</option>
-              <option value="No PPMP/APP/POW" {% if entry.remarks == "No PPMP/APP/POW" %}selected{% endif %}>No PPMP/APP/POW</option>
-              <option value="Awarded Already" {% if entry.remarks == "Awarded Already" %}selected{% endif %}>Awarded Already</option>
-              <option value="Finished Already" {% if entry.remarks == "Finished Already" %}selected{% endif %}>Finished Already</option>
-            </select>
+              <label for="remarks_{{ entry.code }}">Remarks</label>
+              <select id="remarks_{{ entry.code }}" name="remarks" class="user-input" style="text-align: center; text-align-last: center;">
+                  <option value="" disabled selected>{{ entry.remarks }}</option>
+                  <option value="No PPMP/APP/POW" {% if entry.remarks == "No PPMP/APP/POW" %}selected{% endif %}>No PPMP/APP/POW</option>
+                  <option value="Awarded Already" {% if entry.remarks == "Awarded Already" %}selected{% endif %}>Awarded Already</option>
+                  <option value="Finished Already" {% if entry.remarks == "Finished Already" %}selected{% endif %}>Finished Already</option>
+              </select>
           </div>
-      
+  
           <!-- Submit Button -->
           <div class="form-submit-btn">
-            <input type="submit" value="Update">
+              <input type="submit" value="Update">
           </div>
-          <a href="{% url 'procurements' %}">
-            <div class="form-submit-btn">
-             <div class="exit" style="background-color: red;">Exit</div>
-            </div>
-          </a>
-        </form>
-        {% endfor %}
-      </div>
+      </form>
+      {% endfor %}
+  
+      <!-- Exit Button Outside the Loop -->
+      <a href="{% url 'procurements' %}">
+          <div class="form-submit-btn">
+              <div class="exit" style="background-color: red;">Exit</div>
+          </div>
+      </a>
+  </div>
+  
       
    
     <!------------------------------------------------------ JAVASCRIPT-------------------------------------------------->
@@ -422,8 +305,58 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   
+    <script>
+      // Add an event listener to the project link
+      document.querySelector('a[href="?project_code={{ entry.code }}"]').addEventListener('click', function(event) {
+          event.preventDefault();  // Prevent the default action (e.g., navigating)
+  
+          // Show SweetAlert with the message 'Hi'
+          Swal.fire({
+              title: 'Hi!',
+              text: 'You clicked on the project.',
+              icon: 'info',
+              confirmButtonText: 'OK'
+          });
+      });
+  </script><script>function showUploadedFiles(projectCode) {
+    fetch(`/get_uploaded_files/?project_code=${projectCode}`)
+        .then(response => response.json())
+        .then(data => {
+            // Check if files were returned
+            if (data.files.length > 0) {
+                const filesList = data.files.map(file => 
+                    `<li><strong>${file.file_type}</strong>: ${file.file_name} <br><small>Uploaded on: ${file.uploaded_at}</small></li>`
+                ).join('<hr>');  // Add a horizontal line between each file
 
+                // Display the list of files in a SweetAlert popup
+                Swal.fire({
+                    title: 'Uploaded Files',
+                    html: `<ul style="text-align: left;">${filesList}</ul>`,
+                    icon: 'info',
+                    confirmButtonText: 'Close'
+                });
+            } else {
+                // Display a message if no files were found
+                Swal.fire({
+                    title: 'No Files Found',
+                    text: 'No files uploaded for this project.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching files:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'There was an error retrieving the files.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        });
+}
 
+</script>
 
 <script>  
   //INPUT MASKING 

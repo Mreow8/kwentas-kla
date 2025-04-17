@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404  # Render templ
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse  # HTTP response types for returning plain text, redirection, JSON data
 from django.db.models import F, ExpressionWrapper, FloatField  # Allows field expressions and calculations directly in database queries
 from django.contrib.auth.decorators import login_required  # Decorator to restrict view access to authenticated users only
+from .models import UploadedFileData
 from django.core.paginator import Paginator  # Paginator for splitting large datasets across multiple pages
 from django.core.cache import cache  # Cache framework to store and retrieve data for performance optimization
 from io import BytesIO  # In-memory byte streams, useful for temporary file handling
@@ -341,35 +342,31 @@ from django.core.paginator import Paginator
 from django.shortcuts import render
 
 def handle_entries(request, template_name):
-    """
-    Handles retrieving, sorting, and paginating project entries
-    and renders the specified template.
-    """
-    # Retrieve project entries
     _, _, all_entries = get_project_entries()
-    
-    # Get sorting option from query parameters; do nothing if not specified
     sort_option = request.GET.get('sort')
     
-    # Apply sorting if an option is selected
     if sort_option == 'oldest':
-        all_entries.sort(key=lambda x: x['created_at'])  # Sort by oldest
+        all_entries.sort(key=lambda x: x['created_at'])
     elif sort_option == 'recent':
-        all_entries.sort(key=lambda x: x['created_at'], reverse=True)  # Sort by recent
-    
-    # Paginate the entries (sorted or unsorted)
-    paginator = Paginator(all_entries, 10)  # Show 10 projects per page
+        all_entries.sort(key=lambda x: x['created_at'], reverse=True)
+
+    paginator = Paginator(all_entries, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Render the appropriate template
+    # ✅ Get selected project_code from query parameters
+    selected_project_code = request.GET.get('project_code')
+
+    # ✅ Filter uploaded files by project code
+    uploaded_files = UploadedFileData.objects.filter(project_code=selected_project_code) if selected_project_code else []
+
     return render(request, template_name, {
         'page_obj': page_obj,
         'all_entries': all_entries,
-        'sort_option': sort_option  # Pass current sort option to the template
+        'uploaded_files': uploaded_files,
+        'selected_project_code': selected_project_code,
+        'sort_option': sort_option,
     })
-
-
 def obligations(request):
     return handle_entries(request, 'KwentasApp/obligations.html')
 

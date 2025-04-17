@@ -10,6 +10,9 @@ from django.conf import settings
 
 urlpatterns = [
     # path('/', RedirectView.as_view(pattern_name='login', permanent=False)),
+path('get_uploaded_files/', views.get_uploaded_files, name='get_uploaded_files'),
+
+    path('upload_excel/', views.upload_excel, name='upload_excel'),
     path('login/', views.login_view, name='login'),
     path('create_entry/', create_entry, name='create_entry'),
     path('continuing_projects/', continuing_projects, name='continuing_projects'),
