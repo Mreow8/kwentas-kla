@@ -366,6 +366,8 @@ def handle_entries(request, template_name):
         'uploaded_files': uploaded_files,
         'selected_project_code': selected_project_code,
         'sort_option': sort_option,
+
+        
     })
 def obligations(request):
     return handle_entries(request, 'KwentasApp/obligations.html')
@@ -374,6 +376,7 @@ def disbursements(request):
     return handle_entries(request, 'KwentasApp/disbursements.html')
 
 def procurements(request):
+    
     return handle_entries(request, 'KwentasApp/procurements.html')
 
 def check_payment(request):

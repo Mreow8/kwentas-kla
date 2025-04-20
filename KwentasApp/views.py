@@ -3,148 +3,146 @@ from django.contrib.auth.forms import UserCreationForm  # Form for creating a ne
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import login, logout, authenticate  # Functions for handling login, logout, and authentication
 from django.contrib import messages  # Django messages framework for displaying feedback messages to users
-from django.contrib.auth.decorators import login_required, user_passes_test  # Decorators for restricting access to logged-in users or users passing a test
+from django.contrib.auth.decorators import login_required, user_passes_test  # Decorators for restricting access
 from django.urls import reverse  # Generates URLs based on view names
-import openpyxl
-from django.shortcuts import redirect
-from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
-
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse  # HTTP responses for plain text, redirection, or JSON data
+from django.views.decorators.csrf import csrf_exempt  # Exempts a view from CSRF protection
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse  # HTTP responses
 from django.views.decorators.cache import never_cache  # Prevents caching of the decorated view's response
-from django.views.decorators.csrf import csrf_exempt  # Exempts a view from CSRF protection
 from django.contrib.auth.hashers import make_password  # Hashes passwords securely
-from django.core.mail import EmailMultiAlternatives, BadHeaderError  # For sending multipart email messages and handling header errors
+from django.core.mail import EmailMultiAlternatives, BadHeaderError, send_mail  # Email handling
 from django.template.loader import render_to_string  # Renders templates to a string, useful for email templates
-from .forms import RegistrationForm  # Custom registration form specific to your app
-from .models import CustomUser  # Custom user model if using an extension of Django’s default User model
-import logging  # Logging module for tracking events or errors
-import json  # Provides functions to parse and write JSON data
-import random  # Provides utilities for random number generation
-import string  # Includes constants and utilities for string manipulation
-from django.http import HttpResponse  # Returns HTTP responses with plain text or HTML
-import openpyxl  # Library for working with Excel files
-import os  # OS utilities for interacting with the file system
-from io import BytesIO  # In-memory byte stream, useful for creating temporary files
-from django.conf import settings  # Accesses Django project settings
-from openpyxl.styles import Font  # Styling fonts in Excel cells
-from .projects import get_project_entries, indexPage  # Imports a custom function to retrieve project entries
+from django.views.decorators.http import require_POST, require_http_methods  # Restricts view methods
 from django.core.files.base import ContentFile  # For working with file-like objects in memory
-import qrcode  # Library for generating QR codes
-import pyotp  # Library for creating and verifying time-based OTPs (One-Time Passwords)
-import qrcode  # For generating QR codes
-from django.http import JsonResponse  # Returns JSON responses
-from django.shortcuts import render  # Renders HTML templates
-from django.conf import settings  # Accesses project settings configuration
-from io import BytesIO  # In-memory file-like object
-from django.core.files.base import ContentFile  # In-memory file storage
-import pyotp  # Library for generating one-time passwords (OTPs)
-from django.shortcuts import render, redirect  # For rendering templates and redirecting views
-from django.contrib.auth.decorators import login_required  # Restricts view access to logged-in users only
-from django.contrib import messages  # Displays one-time messages to the user
-from django.http import JsonResponse  # Returns JSON response
-from django.contrib.auth import authenticate  # Authenticates users
-from django.contrib.auth import authenticate, login as auth_login  # Authenticates and logs in a user
-from django.urls import reverse  # Generates URLs dynamically based on view names
-from .models import UserProfile  # Custom user profile model (if defined in your app)
-from django.contrib.auth.decorators import login_required  # Ensures view access only for logged-in users
-import logging  # For logging application events
-from django.http import JsonResponse  # JSON response generation
-from django.core.mail import send_mail  # Function for sending emails via Django’s email backend
-from django.views.decorators.csrf import csrf_exempt  # CSRF exemption for specific views
-import random  # Random number generation
-from django.views.decorators.http import require_POST  # Restricts a view to POST requests only
-from django.http import JsonResponse  # Returns a JSON response
-from django.shortcuts import render  # Renders HTML templates for views
-from django.contrib.auth.decorators import user_passes_test  # Allows access to users meeting specific conditions
-from django.views.decorators.csrf import csrf_exempt  # Exempts a view from CSRF protection
-import random  # Random utilities
+from django.conf import settings  # Accesses Django project settings
+
+import logging  # Logging module for tracking events or errors
 import json  # JSON data handling
-from django.core.mail import EmailMultiAlternatives  # Email utility for multi-part messages
-from django.http import JsonResponse  # JSON response for AJAX or API endpoints
-from django.template.loader import render_to_string  # Renders templates to strings for emails
-from django.views.decorators.csrf import csrf_exempt  # CSRF exemption decorator
-import traceback  # Module for extracting, formatting, and printing exception tracebacks
-import os  # For file system interaction
+import random  # Random number generation
+import string  # Includes constants and utilities for string manipulation
+import traceback  # For extracting and formatting exception tracebacks
+import os  # OS utilities for interacting with the file system
+import zipfile  # For handling zip archives
+from io import BytesIO  # In-memory byte stream
+
 import openpyxl  # Excel file handling
-from django.http import HttpResponse, JsonResponse  # HTTP and JSON responses
-from django.conf import settings  # Accesses Django configuration settings
-from openpyxl.styles import Font, Alignment, Border, Side  # Cell styling for Excel spreadsheets
-from .models import UploadedFileData
-logger = logging.getLogger(__name__)  # Initializes logger for tracking events or errors
-print("KwentasApp.views module loaded")  # Debugging print
+from openpyxl.styles import Font, Alignment, Border, Side  # Styling for Excel cells
 
-FILE_TYPE_KEYWORDS = {
-    "PPMP": ["PPMP", "PROJECT PROCUREMENT MANAGEMENT PLAN"],
-    "APP": ["APP", "ANNUAL PROCUREMENT PLAN"],
-    "POW": ["POW", "PROGRAM OF WORKS"]
-}
+import qrcode  # For generating QR codes
+import pyotp  # For generating and verifying time-based OTPs
 
-@csrf_exempt
-def upload_excel(request):
-    if request.method == 'POST':
-        uploaded_file = request.FILES.get('excel_file')
-        selected_type = request.POST.get('file_type')
-        project_code = request.POST.get('project_code')
+from .forms import RegistrationForm  # Custom registration form specific to your app
+from .models import CustomUser, UserProfile, UploadedFileData, Entry  # Custom models
+from .projects import get_project_entries, indexPage  # Custom project utility functions
 
-        if not uploaded_file.name.lower().endswith(('.xlsx', '.xls')):
-            messages.error(request, "Only Excel files are allowed.")
-            return redirect('procurements')
 
-        try:
-            wb = openpyxl.load_workbook(uploaded_file, data_only=True)
-            keywords = FILE_TYPE_KEYWORDS.get(selected_type.upper(), [])
-
-            found = False
-            for sheet in wb.worksheets:
-                for row in sheet.iter_rows(values_only=True):
-                    for cell in row:
-                        if cell is None:
-                            continue
-                        text = str(cell).strip().upper()
-                        if any(keyword in text for keyword in keywords):
-                            found = True
-                            break
-                    if found:
-                        break
-                if found:
-                    break
-
-            if found:
-                # ✅ Save file to DB
-                UploadedFileData.objects.create(
-                    project_code=project_code,
-                    file_type=selected_type,
-                    file=uploaded_file,              # FileField
-                    file_name=uploaded_file.name     # Just original filename
-                )
-                messages.success(request, f"{selected_type} content detected and saved for project {project_code}.")
-            else:
-                messages.error(request, f"No '{selected_type}' or its full form found in the file.")
-
-        except Exception as e:
-            messages.error(request, f"Error reading Excel file: {e}")
-
-    return redirect('procurements')
 def get_uploaded_files(request):
     project_code = request.GET.get('project_code')
+    print({project_code})
     
     if project_code:
         files = UploadedFileData.objects.filter(project_code=project_code)
-        print(f"Found {len(files)} files for project code {project_code}")  # Debugging print statement
+        print(f"Found {len(files)} files for project code {project_code}")
 
         file_data = [{
+             'file_id': file.file_id,  
             'file_name': file.file_name,
             'file_type': file.file_type,
-            'uploaded_at': file.uploaded_at.strftime('%Y-%m-%d %H:%M:%S')
+            'uploaded_at': file.uploaded_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'file_url': request.build_absolute_uri(file.file.url)  # 👈 Add the download URL here
         } for file in files]
 
-        print(f"Files: {file_data}")  # Debugging print statement
+        print(f"Files: {file_data}")
         
         return JsonResponse({'files': file_data})
     else:
         return JsonResponse({'files': []})
 
+logger = logging.getLogger(__name__)  # Initializes logger for tracking events or errors
+print("KwentasApp.views module loaded")  # Debugging print
+
+def update_project(request, code):
+    entry = Entry.objects.get(code=code)  # or whatever model you are using
+    return render(request, 'procurements.html', {'entry': entry})
+
+
+FILE_TYPE_KEYWORDS = {
+    "PPMP": ["PPMP", "PROJECT PROCUREMENT MANAGEMENT PLAN"],
+    "APP": ["APP", "ANNUAL PROCUREMENT PLAN"],
+    "POW": ["POW", "PROGRAM OF WORKS"]  
+}
+# views.py
+
+@csrf_exempt
+def upload_excel(request):
+    if request.method != 'POST':
+        messages.error(request, "Invalid request method.")
+        return redirect('procurements')
+
+    uploaded_file = request.FILES.get('excel_file')
+    selected_type = (request.POST.get('file_type') or '').upper()
+    project_code  = request.POST.get('project_code')
+
+    # Basic input checks
+    if not uploaded_file:
+        messages.error(request, "No file uploaded.")
+        return redirect('procurements')
+
+    if selected_type not in FILE_TYPE_KEYWORDS:
+        messages.error(request, "Please select a valid file type (PPMP, APP, or POW).")
+        return redirect('procurements')
+
+    if not uploaded_file.name.lower().endswith(('.xlsx', '.xls')):
+        messages.error(request, "Only Excel files are allowed.")
+        return redirect('procurements')
+
+    try:
+        wb = openpyxl.load_workbook(uploaded_file, data_only=True)
+        keywords = FILE_TYPE_KEYWORDS[selected_type]
+
+        found = False
+        found_keywords = set()
+
+        # search each sheet, row, cell
+        for sheet in wb.worksheets:
+            for row in sheet.iter_rows(values_only=True):
+                for cell in row:
+                    if not cell:
+                        continue
+                    text = str(cell).upper()
+                    for kw in keywords:
+                        if kw in text:
+                            found = True
+                            found_keywords.add(kw)
+                    if found:
+                        break
+                if found:
+                    break
+            if found:
+                break
+
+        if found:
+            # Save record
+            UploadedFileData.objects.create(
+                project_code = project_code,
+                file_type    = selected_type,
+                file         = uploaded_file,
+                file_name    = uploaded_file.name,
+            )
+            msgs = ", ".join(found_keywords)
+            messages.success(
+                request,
+                f"Found keyword(s) [{msgs}] for {selected_type} — saved under project {project_code}."
+            )
+        else:
+            messages.error(
+                request,
+                f"No '{selected_type}' or its full form found in the Excel file."
+            )
+
+    except Exception as e:
+        messages.error(request, f"Error reading Excel file: {e}")
+
+    return redirect('procurements')
 def bulk_download_xlsx(request):
     if request.method == 'POST':
         selected_codes = request.POST.getlist('selected_entries')
@@ -290,6 +288,7 @@ def base_view(request):
 
 def is_superuser(user):
     return user.is_authenticated and user.is_superuser
+
 @csrf_exempt
 def send_reset_code(request):
     if request.method == 'POST':
@@ -686,12 +685,22 @@ def validate_password(request):
     return JsonResponse({'valid': False, 'error': 'Invalid request method'})
 
 
-    
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 
 
-
-
-               
-
-
-
+@require_POST
+@csrf_exempt  # Exempting CSRF for testing (remove for production)
+def delete_uploaded_file(request, file_id):
+    try:
+        # Use 'file_id' as the field name in the query
+        file = UploadedFileData.objects.get(file_id=file_id)
+        file.delete()
+        return JsonResponse({'success': True})
+    except UploadedFileData.DoesNotExist:
+        return JsonResponse({'error': 'File not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

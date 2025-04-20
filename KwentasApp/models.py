@@ -28,6 +28,7 @@ from django.conf import settings
 from django.db import models
 
 class UploadedFileData(models.Model):
+    file_id = models.AutoField(primary_key=True)  # Explicit auto-incrementing field
     project_code = models.CharField(max_length=100)
     file_type = models.CharField(max_length=10)  # PPMP / APP / POW
     file_name = models.CharField(max_length=255)  # Original name
