@@ -5,6 +5,18 @@
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
 }
+table {
+  table-layout: fixed;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+th,
+td {
+  white-space: normal !important;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
 
 .overlay {
   top: 50%;

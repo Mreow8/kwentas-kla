@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enable Two-Factor Authentication</title>
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Enable Two-Factor Authentication</title>
+        <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f9;
@@ -57,17 +57,17 @@
         .form-group button:hover {
             background-color: #0056b3;
         }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>Enable Two-Factor Authentication</h1>
-    <p>Scan the QR code below with your authenticator app:</p>
-    {% if qr_code %}
-    <img src="{{ qr_code }}" alt="QR Code" />
-    {% else %}
-        <p>No QR code available. Please try again.</p>
-    {% endif %}
-    </div>
-</body>
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <h1>Enable Two-Factor Authentication</h1>
+            <p>Scan the QR code below with your authenticator app:</p>
+            {% if qr_code %}
+                <img src="{{ qr_code }}" alt="QR Code" />
+            {% else %}
+                <p>No QR code available. Please try again.</p>
+            {% endif %}
+        </div>
+    </body>
 </html>

@@ -1,123 +1,146 @@
-{% load humanize %} {% load static tailwind_tags %}
+{% load humanize %}
+{% load static tailwind_tags %}
 <!DOCTYPE html>
-<html lang="en"> {% csrf_token %} <head>
-    <meta charset="UTF-8">
-    <link rel="shortcut icon" type="x-icon" href="{% static 'KwentasApp/img/logobrowser.jpg' %}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Monitoring & Evaluation</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'KwentasApp/css/continuing.css' %}">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/a81368914c.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-    {% tailwind_css %}    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="{% static 'KwentasApp/css/projreports.css' %}">
-  </head>
-  <body>
-       <div class="overlay" id="overlay"></div>
-    <div class="flex h-screen">
-
-      {% include 'KwentasApp/partials/aside.html' %}
-  
-      <main class="flex-1 transition-margin duration-300 ml-0 md:ml-64 min-h-screen bg-gray-100 dark:bg-gray-900{% if not request.user.is_superuser %} non-superuser{% endif %}" id="customers_table">
-        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg mt-3 p-3 sm:p-4 md:p-6 flex flex-col justify-between min-h-[90vh] w-full">
-
-        <div class="p-2 sm:p-4 md:p-8 w-full max-w-[100vw] overflow-hidden">
-          <div class="mb-4">
-            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">Generate Project Reports</h1>
-            
-          
-        </div>
-   <!-- Search -->
-   <div class="relative col-span-1 md:col-span-2 w-full">
-    
-    <form method="GET" action="{% url 'search_projects' 'continuing' %}" class="w-full">
-        <div class="relative">
-            <input type="text" 
-                   id="search-input" 
-                   name="query" 
-                   class="w-full pl-10 pr-4 py-2.5 text-gray-700 bg-white border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-sm hover:border-gray-400 transition-colors duration-200"
-                   placeholder="Search Continuing Projects...">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-            </div>
-        </div>
-    </form>
-    
-    <div id="search-results"></div>
-</div>
-
-</div>
-
-<div class="mb-4 sm:mb-6 flex-grow overflow-hidden">
-        <form id="bulk-download-form" method="POST" action="{% url 'bulk_download_xlsx' %}">
-          {% csrf_token %}
-          <table class="table">
-              <thead>
-                  <tr>
-                      <th class="left-align">PPA</th>
-                      <th>Implementing Unit</th>
-                      <th>Code</th>
-                      <th>Services</th>
-                      {% if request.user.is_superuser %}
-                      <th>
-                        <label for="select-all" style="font-size: 1em; margin-right: 5px;">Download All </label>
-                        <input type="checkbox" id="select-all" style="transform: scale(1.5);" onclick="toggleSelectAll(this)">
-                    </th>
-                                          {% endif %}
-                  </tr>
-              </thead>
-              <tbody>
-                  {% if matched_entries_below_2024 %}
-                      {% for entry in matched_entries_below_2024 %}
-                          <tr>
-                              <td class="ppa" onclick="showDetails('{{ entry.code }}')">{{ entry.ppa }}</td>
-                              <td class="implementing-unit" onclick="showDetails('{{ entry.code }}')">{{ entry.implementing_unit }}</td>
-                              <td class="code" onclick="showDetails('{{ entry.code }}')">{{ entry.code }}</td>
-                              <td class="year" onclick="showDetails('{{ entry.code }}')">{{ entry.services }}</td>
-                              {% if request.user.is_superuser %}
-                                  <td style="text-align: center;">
-                                      <input type="checkbox" name="selected_entries" value="{{ entry.code }}" class="entry-checkbox" style="transform: scale(1.5);">
-                                  </td>
-                              {% endif %}
-                          </tr>
-                      {% endfor %}
-                  {% else %}
-                      {% if page_obj %}
-                          {% for entry in page_obj %}
-                              <tr>
-                                  <td class="ppa" onclick="showDetails('{{ entry.code }}')">{{ entry.ppa }}</td>
-                                  <td class="implementing-unit" onclick="showDetails('{{ entry.code }}')">{{ entry.implementing_unit }}</td>
-                                  <td class="code" onclick="showDetails('{{ entry.code }}')">{{ entry.code }}</td>
-                                  <td class="year" onclick="showDetails('{{ entry.code }}')">{{ entry.services }}</td>
-                                  {% if request.user.is_superuser %}
-                                      <td style="text-align: center;">
-                                          <input type="checkbox" name="selected_entries" value="{{ entry.code }}" class="entry-checkbox" style="transform: scale(1.5); box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
-                                      </td>
-                                  {% endif %}
-                              </tr>
-                          {% endfor %}
-                      {% else %}
-                          <tr>
-                              <td colspan="6">No projects found.</td>
-                          </tr>
-                      {% endif %}
-                  {% endif %}
-              </tbody>
-          </table>
-          {% if request.user.is_superuser %}
-              <div class="export__file2">
-                  <button type="submit" class="download">Download Selected</button>
-              </div>
-          {% endif %}
-      </form>
-    </div>
-      {% if not request.user.is_superuser %}
-          <style>
+<html lang="en">
+    {% csrf_token %}
+    <head>
+        <meta charset="UTF-8">
+        <link rel="shortcut icon"
+              type="x-icon"
+              href="{% static 'KwentasApp/img/logobrowser.jpg' %}">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Monitoring & Evaluation</title>
+        <link rel="stylesheet"
+              type="text/css"
+              href="{% static 'KwentasApp/css/continuing.css' %}">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+              rel="stylesheet">
+        <script src="https://kit.fontawesome.com/a81368914c.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+        {% tailwind_css %}
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <link rel="stylesheet"
+              type="text/css"
+              href="{% static 'KwentasApp/css/projreports.css' %}">
+    </head>
+    <body>
+        <div class="overlay" id="overlay"></div>
+        <div class="flex h-screen">
+            {% include 'KwentasApp/partials/aside.html' %}
+            <main class="flex-1 transition-margin duration-300 ml-0 md:ml-64 min-h-screen bg-gray-100 dark:bg-gray-900{% if not request.user.is_superuser %} non-superuser{% endif %}"
+                  id="customers_table">
+                <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg mt-3 p-3 sm:p-4 md:p-6 flex flex-col justify-between min-h-[90vh] w-full">
+                    <div class="p-2 sm:p-4 md:p-8 w-full max-w-[100vw] overflow-hidden">
+                        <div class="mb-4">
+                            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">Generate Project Reports</h1>
+                        </div>
+                        <!-- Search -->
+                        <div class="relative col-span-1 md:col-span-2 w-full">
+                            <form method="GET"
+                                  action="{% url 'search_projects' 'continuing' %}"
+                                  class="w-full">
+                                <div class="relative">
+                                    <input type="text"
+                                           id="search-input"
+                                           name="query"
+                                           class="w-full pl-10 pr-4 py-2.5 text-gray-700 bg-white border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-sm hover:border-gray-400 transition-colors duration-200"
+                                           placeholder="Search Continuing Projects...">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400"
+                                             fill="none"
+                                             stroke="currentColor"
+                                             viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </form>
+                            <div id="search-results"></div>
+                        </div>
+                    </div>
+                    <div class="mb-4 sm:mb-6 flex-grow overflow-hidden">
+                        <form id="bulk-download-form"
+                              method="POST"
+                              action="{% url 'bulk_download_xlsx' %}">
+                            {% csrf_token %}
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th class="left-align">PPA</th>
+                                        <th>Implementing Unit</th>
+                                        <th>Code</th>
+                                        <th>Services</th>
+                                        {% if request.user.is_superuser %}
+                                            <th>
+                                                <label for="select-all" style="font-size: 1em; margin-right: 5px;">Download All</label>
+                                                <input type="checkbox"
+                                                       id="select-all"
+                                                       style="transform: scale(1.5)"
+                                                       onclick="toggleSelectAll(this)">
+                                            </th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if matched_entries_below_2024 %}
+                                        {% for entry in matched_entries_below_2024 %}
+                                            <tr>
+                                                <td class="ppa" onclick="showDetails('{{ entry.code }}')">{{ entry.ppa }}</td>
+                                                <td class="implementing-unit" onclick="showDetails('{{ entry.code }}')">{{ entry.implementing_unit }}</td>
+                                                <td class="code" onclick="showDetails('{{ entry.code }}')">{{ entry.code }}</td>
+                                                <td class="year" onclick="showDetails('{{ entry.code }}')">{{ entry.services }}</td>
+                                                {% if request.user.is_superuser %}
+                                                    <td style="text-align: center;">
+                                                        <input type="checkbox"
+                                                               name="selected_entries"
+                                                               value="{{ entry.code }}"
+                                                               class="entry-checkbox"
+                                                               style="transform: scale(1.5)">
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% if page_obj %}
+                                            {% for entry in page_obj %}
+                                                <tr>
+                                                    <td class="ppa" onclick="showDetails('{{ entry.code }}')">{{ entry.ppa }}</td>
+                                                    <td class="implementing-unit" onclick="showDetails('{{ entry.code }}')">{{ entry.implementing_unit }}</td>
+                                                    <td class="code" onclick="showDetails('{{ entry.code }}')">{{ entry.code }}</td>
+                                                    <td class="year" onclick="showDetails('{{ entry.code }}')">{{ entry.services }}</td>
+                                                    {% if request.user.is_superuser %}
+                                                        <td style="text-align: center;">
+                                                            <input type="checkbox"
+                                                                   name="selected_entries"
+                                                                   value="{{ entry.code }}"
+                                                                   class="entry-checkbox"
+                                                                   style="transform: scale(1.5);
+                                                                          box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3)">
+                                                        </td>
+                                                    {% endif %}
+                                                </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="6">No projects found.</td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                            {% if request.user.is_superuser %}
+                                <div class="export__file2">
+                                    <button type="submit" class="download">Download Selected</button>
+                                </div>
+                            {% endif %}
+                        </form>
+                    </div>
+                    {% if not request.user.is_superuser %}
+                        <style>
               .left-align {
                   text-align: left !important;
               }
@@ -125,386 +148,532 @@
               .non-superuser .table td:nth-child(5) {
                   display: none;
               }
-          </style>
-      {% endif %}
-        
-<div class="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-  <!-- Back Button -->
-  <div class="w-full sm:w-auto order-2 sm:order-1">
-      <a href="{% url 'homepage' %}" 
-         class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-          </svg>
-          Back to Homepage
-      </a>
-  </div>
-<!-- Pagination Controls -->
-<nav class="w-full sm:w-auto order-1 sm:order-2">
-  <ul class="flex items-center justify-center sm:justify-end -space-x-px">
-      {% if page_obj.has_previous %}
-          <li>
-              <a href="?page=1" class="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                  « First
-              </a>
-          </li>
-          <li>
-              <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                  Previous
-              </a>
-          </li>
-      {% endif %}
-
-      <li>
-          <span class="px-3 py-2 leading-tight text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">
-              Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-          </span>
-      </li>
-
-      {% if page_obj.has_next %}
-          <li>
-              <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                  Next
-              </a>
-          </li>
-          <li>
-              <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                  Last »
-              </a>
-          </li>
-      {% endif %}
-  </ul>
-    </main>
-    </div>
-    
-    <!-- DETAILS  -->
-    <div class="details" id="details">
-      <a href="{% url 'all_projects' %}">
-        <i class="material-icons x" id="exit">close</i>
-      </a>
-      <a href="{% url 'all_projects' %}">
-        <h1 class="form-title">PROJECT DETAILS</h1>
-      </a>
-      <ul> {% for entry in all_entries %} <li class="entry-item" id="details-{{ entry.code }}" style="display: none;">
-          <div class="details-container">
-            <div class="main-user-info" id="main-detail">
-              <div class="user-input-box">
-                <p class="label">PPA</p>
-                <p id="fullName" class="user-text">{{ entry.ppa }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Implementing Unit</p>
-                <p id="username" class="user-text">{{ entry.implementing_unit }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Location</p>
-                <p id="email" class="user-text">{{ entry.location }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Appropriation</p>
-                <p id="phoneNumber" class="user-text">₱{{ entry.appropriation|intcomma }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Remarks</p>
-                <p id="password" class="user-text">{{ entry.remarks }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Start Date</p>
-                <p id="confirmPassword" class="user-text">{{ entry.start_date }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">End Date</p>
-                <p id="endDate" class="user-text">{{ entry.end_date }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Code</p>
-                <p id="code" class="user-text">{{ entry.code }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Services</p>
-                <p id="services" class="user-text">{{ entry.services }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Year</p>
-                <p id="year" class="user-text">{{ entry.year }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Total Budget</p>
-                <p id="totalBudget" class="user-text">₱{{ entry.overall_budget|intcomma }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Total Spent</p>
-                <p id="totalAddedBudget" class="user-text">₱{{ entry.total_disbursements|intcomma }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Total Added Budget</p>
-                <p id="totalSpent" class="user-text">₱{{ entry.added_budget|intcomma }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Remaining Balance</p>
-                <p id="remainingBalance" class="user-text">₱{{ entry.remaining_total_balance|intcomma }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Remaining Obligation</p>
-                <p id="remainingObligations" class="user-text">₱{{ entry.remaining_obligations|intcomma }}</p>
-              </div>
-              <div class="user-input-box">
-                <p class="label">Total Obligation</p>
-                <p id="totalObligations" class="user-text">₱{{ entry.total_obligations|intcomma }}</p>
-              </div>
-            </div>
-            
-            <div class="chart-container" data-entry-code="{{ entry.code }}" id="chart">
-              <div class="user-input-box">
-                <p class="label">Utilization Rate: </p>
-                <span class="utilizationRate">{{ entry.utilization_rate|floatformat:"-2" }} %</span>
-              </div>
-              <canvas class="pie-chart"></canvas>
-            </div>
-          </div>
-          <div class="tables-container">
-            <div class="table-box">
-              <span class="table-title">Added Budget</span>
-              <div class="table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Amount</th>
-                      <th>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody> {% for budget in entry.budget_data %} <tr>
-                      <td>{{ budget.name|intcomma }}</td>
-                      <td>₱{{ budget.added_budget|intcomma }}</td>
-                      <td>{{ budget.date }}</td>
-                    </tr> {% endfor %} </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="table-box">
-              <span class="table-title">Added Obligation</span>
-              <br>
-              <div class="table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Amount</th>
-                      <th>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody> {% for obligation in entry.obligation %} <tr>
-                      <td>{{ obligation.name }}</td>
-                      <td>₱{{ obligation.obligation|intcomma }}</td>
-                      <td>{{ obligation.date}}</td>
-                    </tr> {% endfor %} </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="table-box">
-              <span class="table-title">Added Disbursement</span>
-              <br>
-              <div class="table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Amount</th>
-                      <th>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody> {% for disbursement in entry.disbursement %} <tr>
-                      <td>{{ disbursement.name }}</td>
-                      <td>₱{{ disbursement.disbursement|intcomma }}</td>
-                      <td>{{ disbursement.date}}</td>
-                    </tr> {% endfor %} </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </li> {% endfor %} </ul>
-    </div>
-    <!-- UPDATE -->
-    <div class="details" id="update">
-      <a href="{% url 'continuing_projects' %}">   
-      </a>
-      <a href="{% url 'continuing_projects' %}">
-        <h1 class="form-title">Update Project</h1>
-      </a> {% for entry in all_entries %} <form id="updateForm_{{ entry.code }}" action="{% url 'update_entry' 'continuing'%}" method="post" onsubmit="handleSubmit(event)"> {% csrf_token %} <input type="hidden" name="entry_code" value="{{ entry.code }}">
-        <div class="main-user-info" id="main-update">
-          <div class="user-input-box">
-            <label for="ppa_{{ entry.code }}">PPA</label>
-            <input type="text" id="ppa_{{ entry.code }}" name="ppa" class="user-text" value="{{ entry.ppa }}">
-          </div>
-          <div class="user-input-box">
-            <label for="implementing_unit_{{ entry.code }}">Implementing Unit</label>
-            <div class="select-container">
-              <select id="implementing_unit_{{ entry.code }}" name="implementing_unit" class="user-input">
-                <option value="" disabled selected>{{ entry.implementing_unit }}</option>
-                <option value="Mayor's Office" {% if entry.implementing_unit == "Mayor's Office" %}selected{% endif %}>Mayor's Office</option>
-                <option value="Tourism Office" {% if entry.implementing_unit == "Tourism Office" %}selected{% endif %}>Tourism Office</option>
-                <option value="PESO Office" {% if entry.implementing_unit == "PESO Office" %}selected{% endif %}>PESO Office</option>
-                <option value="MDRRMO" {% if entry.implementing_unit == "MDRRMO" %}selected{% endif %}>MDRRMO</option>
-                <option value="Sanguniang Barangay Office" {% if entry.implementing_unit == "Sanguniang Barangay Office" %}selected{% endif %}>Sanguniang Barangay Office</option>
-                <option value="MPDC" {% if entry.implementing_unit == "MPDC" %}selected{% endif %}>MPDC</option>
-                <option value="MCR Office" {% if entry.implementing_unit == "MCR Office" %}selected{% endif %}>MCR Office</option>
-                <option value="MBO Office" {% if entry.implementing_unit == "MBO Office" %}selected{% endif %}>MBO Office</option>
-                <option value="Accountant Office" {% if entry.implementing_unit == "Accountant Office" %}selected{% endif %}>Accountant Office</option>
-                <option value="Assessor's Office" {% if entry.implementing_unit == "Assessor's Office" %}selected{% endif %}>Assessor's Office</option>
-                <option value="MHO Office" {% if entry.implementing_unit == "MHO Office" %}selected{% endif %}>MHO Office</option>
-                <option value="Parks & Plaza" {% if entry.implementing_unit == "Parks & Plaza" %}selected{% endif %}>Parks & Plaza</option>
-                <option value="MSWD Office" {% if entry.implementing_unit == "MSWD Office" %}selected{% endif %}>MSWD Office</option>
-                <option value="MENRO Office" {% if entry.implementing_unit == "MENRO Office" %}selected{% endif %}>MENRO Office</option>
-                <option value="MO" {% if entry.implementing_unit == "MO" %}selected{% endif %}>MO</option>
-                <option value="Streets & Bridges" {% if entry.implementing_unit == "Streets & Bridges" %}selected{% endif %}>Streets & Bridges</option>
-                <option value="LDF" {% if entry.implementing_unit == "LDF" %}selected{% endif %}>LDF</option>
-                <option value="Waterworks" {% if entry.implementing_unit == "Waterworks" %}selected{% endif %}>Waterworks</option>
-                <option value="Markets" {% if entry.implementing_unit == "Markets" %}selected{% endif %}>Markets</option>
-                <option value="Zero Waste" {% if entry.implementing_unit == "Zero Waste" %}selected{% endif %}>Zero Waste</option>
-              </select>
-            </div>
-          </div>
-          <div class="user-input-box">
-            <label for="location_{{ entry.code }}">Location</label>
-            <input type="text" id="location_{{ entry.code }}" name="location" class="user-input" value="{{ entry.location }}">
-          </div>
-          <div class="user-input-box">
-            <label for="remarks_{{ entry.code }}">Remarks</label>
-            <input type="text" id="remarks_{{ entry.code }}" name="remarks" class="user-input" value="{{ entry.remarks }}">
-          </div>
-          <div class="user-input-box">
-            <label for="start_date_{{ entry.code }}">Start Date</label>
-            <input type="date" id="start_date_{{ entry.code }}" name="start_date" class="user-input" value="{{ entry.start_date }}">
-          </div>
-          <div class="user-input-box">
-            <label for="end_date_{{ entry.code }}">End Date</label>
-            <input type="date" id="end_date_{{ entry.code }}" name="end_date" class="user-input" value="{{ entry.end_date }}">
-          </div>
-          <div class="user-input-box">
-            <label for="code_{{ entry.code }}">Code</label>
-            <input type="text" id="code_{{ entry.code }}" name="code" class="user-input" value="{{ entry.code }}">
-          </div>
-          <div class="user-input-box">
-            <label for="services_{{ entry.code }}">Services</label>
-            <select id="services_{{ entry.code }}" name="services" class="user-input">
-              <option value="" disabled selected>{{ entry.services }}</option>
-              <option value="General" {% if entry.services == "General" %}selected{% endif %}>General</option>
-              <option value="Social" {% if entry.services == "Social" %}selected{% endif %}>Social</option>
-              <option value="Economic" {% if entry.services == "Economic" %}selected{% endif %}>Economic</option>
-              <option value="Environmental" {% if entry.services == "Environmental" %}selected{% endif %}>Environmental</option>
-            </select>
-          </div>
-          <div class="user-input-box">
-            <label for="year_{{ entry.code }}">Year</label>
-            <input type="number" id="year_{{ entry.code }}" name="year" class="user-input" value="{{ entry.year }}">
-          </div>
-        </div>
-        <div class="form-submit-btn">
-          <input type="submit" value="Update">
-        </div>
-        <a href="{% url 'continuing_projects' %}">
-          <div class="form-submit-btn">
-           <div class="exit" style="background-color: red;">Exit</div>
-          </div>
-        </a>
-      </form> {% endfor %}
-    </div>
-    <!-- BUDGET -->
-    <div class="details" id="budget">
-      <div class="login-content">
-        {% if project_type %}
-        <form id="add-budget-form" action="{% url 'add_budget' project_type %}" method="post"> {% csrf_token %} <h2 class="title" style="margin-bottom: 45px;">Add Project Budget</h2>
-          {% else %}
-          <p>Project type is missing!</p>
-          {% endif %}          
-          <input type="hidden" name="entry_code" id="budget-code">
-          <div class="input-div-new">
-            <div class="div">
-             <p class="inputs-label" style="white-space: nowrap;">Budget Name</p>
-              <!-- Use label instead of h5 -->
-              <input type="text" name="budget_name" class="input">
-            </div>
-          </div>
-          <div class="input-div-new">
-            <div class="div">
-              <p class="inputs-label" >Date</p>
-              <!-- Use label instead of h5 -->
-              <input type="date" name="budget_date" class="input">
-            </div>
-          </div>
-          <div class="input-div-new">
-            <div class="div">
-              <p class="inputs-label"  style="white-space: nowrap;">Added Budget</p>
-              <!-- Use label instead of h5 -->
-              <input type="text" name="added_budget" class="input">
-            </div>
-          </div>
-          <button type="submit" class="btn-add" value="Submit">Submit</button>
-          <a href="{% url 'continuing_projects' %}" class="btn-cancel" style="color: white;">Exit</a>
-        </form>
-      </div>
-    </div>
-    <!-- OBLIGATION -->
-    <div class="details" id="obligation">
-      <div class="login-content">
-        <form id="add-obligation-form" action="{% url 'add_obligation' 'continuing' %}" method="post"> {% csrf_token %} <h2 class="title">Add Project Obligation</h2>
-          <br>
-          <br>
-          <input type="hidden" name="entry-code" id="obligation-code">
-          <div class="input-div-new">
-            <div class="div">
-              <p class="inputs-label"  style="white-space: nowrap;">Obligation Name</p>
-              <!-- Use label instead of h5 -->
-              <input type="text" name="obligation_name" class="input">
-            </div>
-          </div>
-          <div class="input-div-new">
-            <div class="div">
-              <p class="inputs-label" >Date</p>
-              <!-- Use label instead of h5 -->
-              <input type="date" name="obligation_date" class="input">
-            </div>
-          </div>
-          <div class="input-div-new">
-            <div class="div">
-              <p class="inputs-label"  style="white-space: nowrap;">Obligation Spent</p>
-              <!-- Use label instead of h5 -->
-              <input type="text" name="obligation_input" class="input">
-            </div>
-          </div>
-          <button type="submit" class="btn-add" value="Submit">Submit</button>
-          <a href="{% url 'continuing_projects' %}" class="btn-cancel" style="text-decoration: none; color: white;">Exit</a>
-        </form>
-      </div>
-    </div>
-    <!-- Delete -->
-    <div class="details" id="delete">
-      <div class="login-content">
-        <form id="deleteForm" action="{% url 'delete_entry' 'continuing' %}" method="post">
-          {% csrf_token %}
-          <h2 class="title">Delete Project</h2>
-          <br>
-          <br>
-          <div class="input-div-new">
-            <div class="div">
-              <label for="delete-code" style="white-space: nowrap;">Entry Code</label>
-              <input type="text" name="entry_code" id="delete-code" readonly placeholder="1-121" class="input">
-            </div>
-          </div>
-          <!-- No need for a submit button here -->
-          <button type="button" onclick="confirmDelete()" class="btn-add">Delete</button>
-          <a href="{% url 'continuing_projects' %}" class="btn-cancel" style="text-decoration: none; color: white;">Exit</a>
-        </form>
-        
-      </div>
- </div>
- 
-    <!------------------------------------------------------ JAVASCRIPT-------------------------------------------------->
-    <!-- PIE CHART JS -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
+                        </style>
+                    {% endif %}
+                    <div class="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <!-- Back Button -->
+                        <div class="w-full sm:w-auto order-2 sm:order-1">
+                            <a href="{% url 'homepage' %}"
+                               class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+                                <svg class="w-5 h-5 mr-2"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                </svg>
+                                Back to Homepage
+                            </a>
+                        </div>
+                        <!-- Pagination Controls -->
+                        <nav class="w-full sm:w-auto order-1 sm:order-2">
+                            <ul class="flex items-center justify-center sm:justify-end -space-x-px">
+                                {% if page_obj.has_previous %}
+                                    <li>
+                                        <a href="?page=1"
+                                           class="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                            « First
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="?page={{ page_obj.previous_page_number }}"
+                                           class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                            Previous
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                <li>
+                                    <span class="px-3 py-2 leading-tight text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">
+                                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                    </span>
+                                </li>
+                                {% if page_obj.has_next %}
+                                    <li>
+                                        <a href="?page={{ page_obj.next_page_number }}"
+                                           class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                            Next
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="?page={{ page_obj.paginator.num_pages }}"
+                                           class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                            Last »
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </main>
+                    </div>
+                    <!-- DETAILS  -->
+                    <div class="details" id="details">
+                        <a href="{% url 'all_projects' %}">
+                            <i class="material-icons x" id="exit">close</i>
+                        </a>
+                        <a href="{% url 'all_projects' %}">
+                            <h1 class="form-title">PROJECT DETAILS</h1>
+                        </a>
+                        <ul>
+                            {% for entry in all_entries %}
+                                <li class="entry-item"
+                                    id="details-{{ entry.code }}"
+                                    style="display: none">
+                                    <div class="details-container">
+                                        <div class="main-user-info" id="main-detail">
+                                            <div class="user-input-box">
+                                                <p class="label">PPA</p>
+                                                <p id="fullName" class="user-text">{{ entry.ppa }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">Implementing Unit</p>
+                                                <p id="username" class="user-text">{{ entry.implementing_unit }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">Location</p>
+                                                <p id="email" class="user-text">{{ entry.location }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">Appropriation</p>
+                                                <p id="phoneNumber" class="user-text">₱{{ entry.appropriation|intcomma }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">Remarks</p>
+                                                <p id="password" class="user-text">{{ entry.remarks }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">Start Date</p>
+                                                <p id="confirmPassword" class="user-text">{{ entry.start_date }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">End Date</p>
+                                                <p id="endDate" class="user-text">{{ entry.end_date }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">Code</p>
+                                                <p id="code" class="user-text">{{ entry.code }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">Services</p>
+                                                <p id="services" class="user-text">{{ entry.services }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">Year</p>
+                                                <p id="year" class="user-text">{{ entry.year }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">Total Budget</p>
+                                                <p id="totalBudget" class="user-text">₱{{ entry.overall_budget|intcomma }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">Total Spent</p>
+                                                <p id="totalAddedBudget" class="user-text">₱{{ entry.total_disbursements|intcomma }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">Total Added Budget</p>
+                                                <p id="totalSpent" class="user-text">₱{{ entry.added_budget|intcomma }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">Remaining Balance</p>
+                                                <p id="remainingBalance" class="user-text">₱{{ entry.remaining_total_balance|intcomma }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">Remaining Obligation</p>
+                                                <p id="remainingObligations" class="user-text">₱{{ entry.remaining_obligations|intcomma }}</p>
+                                            </div>
+                                            <div class="user-input-box">
+                                                <p class="label">Total Obligation</p>
+                                                <p id="totalObligations" class="user-text">₱{{ entry.total_obligations|intcomma }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="chart-container" data-entry-code="{{ entry.code }}" id="chart">
+                                            <div class="user-input-box">
+                                                <p class="label">Utilization Rate:</p>
+                                                <span class="utilizationRate">{{ entry.utilization_rate|floatformat:"-2" }} %</span>
+                                            </div>
+                                            <canvas class="pie-chart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="tables-container">
+                                        <div class="table-box">
+                                            <span class="table-title">Added Budget</span>
+                                            <div class="table-wrapper">
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Amount</th>
+                                                            <th>Date</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for budget in entry.budget_data %}
+                                                            <tr>
+                                                                <td>{{ budget.name|intcomma }}</td>
+                                                                <td>₱{{ budget.added_budget|intcomma }}</td>
+                                                                <td>{{ budget.date }}</td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="table-box">
+                                            <span class="table-title">Added Obligation</span>
+                                            <br>
+                                            <div class="table-wrapper">
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Amount</th>
+                                                            <th>Date</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for obligation in entry.obligation %}
+                                                            <tr>
+                                                                <td>{{ obligation.name }}</td>
+                                                                <td>₱{{ obligation.obligation|intcomma }}</td>
+                                                                <td>{{ obligation.date }}</td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="table-box">
+                                            <span class="table-title">Added Disbursement</span>
+                                            <br>
+                                            <div class="table-wrapper">
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Amount</th>
+                                                            <th>Date</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for disbursement in entry.disbursement %}
+                                                            <tr>
+                                                                <td>{{ disbursement.name }}</td>
+                                                                <td>₱{{ disbursement.disbursement|intcomma }}</td>
+                                                                <td>{{ disbursement.date }}</td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <!-- UPDATE -->
+                    <div class="details" id="update">
+                        <a href="{% url 'continuing_projects' %}"></a>
+                        <a href="{% url 'continuing_projects' %}">
+                            <h1 class="form-title">Update Project</h1>
+                        </a>
+                        {% for entry in all_entries %}
+                            <form id="updateForm_{{ entry.code }}"
+                                  action="{% url 'update_entry' 'continuing' %}"
+                                  method="post"
+                                  onsubmit="handleSubmit(event)">
+                                {% csrf_token %}
+                                <input type="hidden" name="entry_code" value="{{ entry.code }}">
+                                <div class="main-user-info" id="main-update">
+                                    <div class="user-input-box">
+                                        <label for="ppa_{{ entry.code }}">PPA</label>
+                                        <input type="text"
+                                               id="ppa_{{ entry.code }}"
+                                               name="ppa"
+                                               class="user-text"
+                                               value="{{ entry.ppa }}">
+                                    </div>
+                                    <div class="user-input-box">
+                                        <label for="implementing_unit_{{ entry.code }}">Implementing Unit</label>
+                                        <div class="select-container">
+                                            <select id="implementing_unit_{{ entry.code }}"
+                                                    name="implementing_unit"
+                                                    class="user-input">
+                                                <option value="" disabled selected>{{ entry.implementing_unit }}</option>
+                                                <option value="Mayor's Office"
+                                                        {% if entry.implementing_unit == "Mayor's Office" %}selected{% endif %}>
+                                                    Mayor's Office
+                                                </option>
+                                                <option value="Tourism Office"
+                                                        {% if entry.implementing_unit == "Tourism Office" %}selected{% endif %}>
+                                                    Tourism Office
+                                                </option>
+                                                <option value="PESO Office"
+                                                        {% if entry.implementing_unit == "PESO Office" %}selected{% endif %}>
+                                                    PESO Office
+                                                </option>
+                                                <option value="MDRRMO"
+                                                        {% if entry.implementing_unit == "MDRRMO" %}selected{% endif %}>
+                                                    MDRRMO
+                                                </option>
+                                                <option value="Sanguniang Barangay Office"
+                                                        {% if entry.implementing_unit == "Sanguniang Barangay Office" %}selected{% endif %}>
+                                                    Sanguniang Barangay Office
+                                                </option>
+                                                <option value="MPDC"
+                                                        {% if entry.implementing_unit == "MPDC" %}selected{% endif %}>
+                                                    MPDC
+                                                </option>
+                                                <option value="MCR Office"
+                                                        {% if entry.implementing_unit == "MCR Office" %}selected{% endif %}>
+                                                    MCR Office
+                                                </option>
+                                                <option value="MBO Office"
+                                                        {% if entry.implementing_unit == "MBO Office" %}selected{% endif %}>
+                                                    MBO Office
+                                                </option>
+                                                <option value="Accountant Office"
+                                                        {% if entry.implementing_unit == "Accountant Office" %}selected{% endif %}>
+                                                    Accountant Office
+                                                </option>
+                                                <option value="Assessor's Office"
+                                                        {% if entry.implementing_unit == "Assessor's Office" %}selected{% endif %}>
+                                                    Assessor's Office
+                                                </option>
+                                                <option value="MHO Office"
+                                                        {% if entry.implementing_unit == "MHO Office" %}selected{% endif %}>
+                                                    MHO Office
+                                                </option>
+                                                <option value="Parks & Plaza"
+                                                        {% if entry.implementing_unit == "Parks & Plaza" %}selected{% endif %}>
+                                                    Parks & Plaza
+                                                </option>
+                                                <option value="MSWD Office"
+                                                        {% if entry.implementing_unit == "MSWD Office" %}selected{% endif %}>
+                                                    MSWD Office
+                                                </option>
+                                                <option value="MENRO Office"
+                                                        {% if entry.implementing_unit == "MENRO Office" %}selected{% endif %}>
+                                                    MENRO Office
+                                                </option>
+                                                <option value="MO"
+                                                        {% if entry.implementing_unit == "MO" %}selected{% endif %}>
+                                                    MO
+                                                </option>
+                                                <option value="Streets & Bridges"
+                                                        {% if entry.implementing_unit == "Streets & Bridges" %}selected{% endif %}>
+                                                    Streets & Bridges
+                                                </option>
+                                                <option value="LDF"
+                                                        {% if entry.implementing_unit == "LDF" %}selected{% endif %}>
+                                                    LDF
+                                                </option>
+                                                <option value="Waterworks"
+                                                        {% if entry.implementing_unit == "Waterworks" %}selected{% endif %}>
+                                                    Waterworks
+                                                </option>
+                                                <option value="Markets"
+                                                        {% if entry.implementing_unit == "Markets" %}selected{% endif %}>
+                                                    Markets
+                                                </option>
+                                                <option value="Zero Waste"
+                                                        {% if entry.implementing_unit == "Zero Waste" %}selected{% endif %}>
+                                                    Zero Waste
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="user-input-box">
+                                        <label for="location_{{ entry.code }}">Location</label>
+                                        <input type="text"
+                                               id="location_{{ entry.code }}"
+                                               name="location"
+                                               class="user-input"
+                                               value="{{ entry.location }}">
+                                    </div>
+                                    <div class="user-input-box">
+                                        <label for="remarks_{{ entry.code }}">Remarks</label>
+                                        <input type="text"
+                                               id="remarks_{{ entry.code }}"
+                                               name="remarks"
+                                               class="user-input"
+                                               value="{{ entry.remarks }}">
+                                    </div>
+                                    <div class="user-input-box">
+                                        <label for="start_date_{{ entry.code }}">Start Date</label>
+                                        <input type="date"
+                                               id="start_date_{{ entry.code }}"
+                                               name="start_date"
+                                               class="user-input"
+                                               value="{{ entry.start_date }}">
+                                    </div>
+                                    <div class="user-input-box">
+                                        <label for="end_date_{{ entry.code }}">End Date</label>
+                                        <input type="date"
+                                               id="end_date_{{ entry.code }}"
+                                               name="end_date"
+                                               class="user-input"
+                                               value="{{ entry.end_date }}">
+                                    </div>
+                                    <div class="user-input-box">
+                                        <label for="code_{{ entry.code }}">Code</label>
+                                        <input type="text"
+                                               id="code_{{ entry.code }}"
+                                               name="code"
+                                               class="user-input"
+                                               value="{{ entry.code }}">
+                                    </div>
+                                    <div class="user-input-box">
+                                        <label for="services_{{ entry.code }}">Services</label>
+                                        <select id="services_{{ entry.code }}" name="services" class="user-input">
+                                            <option value="" disabled selected>{{ entry.services }}</option>
+                                            <option value="General"
+                                                    {% if entry.services == "General" %}selected{% endif %}>
+                                                General
+                                            </option>
+                                            <option value="Social" {% if entry.services == "Social" %}selected{% endif %}>Social</option>
+                                            <option value="Economic"
+                                                    {% if entry.services == "Economic" %}selected{% endif %}>
+                                                Economic
+                                            </option>
+                                            <option value="Environmental"
+                                                    {% if entry.services == "Environmental" %}selected{% endif %}>
+                                                Environmental
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="user-input-box">
+                                        <label for="year_{{ entry.code }}">Year</label>
+                                        <input type="number"
+                                               id="year_{{ entry.code }}"
+                                               name="year"
+                                               class="user-input"
+                                               value="{{ entry.year }}">
+                                    </div>
+                                </div>
+                                <div class="form-submit-btn">
+                                    <input type="submit" value="Update">
+                                </div>
+                                <a href="{% url 'continuing_projects' %}">
+                                    <div class="form-submit-btn">
+                                        <div class="exit" style="background-color: red;">Exit</div>
+                                    </div>
+                                </a>
+                            </form>
+                        {% endfor %}
+                    </div>
+                    <!-- BUDGET -->
+                    <div class="details" id="budget">
+                        <div class="login-content">
+                            {% if project_type %}
+                                <form id="add-budget-form"
+                                      action="{% url 'add_budget' project_type %}"
+                                      method="post">
+                                    {% csrf_token %}
+                                    <h2 class="title" style="margin-bottom: 45px;">Add Project Budget</h2>
+                                {% else %}
+                                    <p>Project type is missing!</p>
+                                {% endif %}
+                                <input type="hidden" name="entry_code" id="budget-code">
+                                <div class="input-div-new">
+                                    <div class="div">
+                                        <p class="inputs-label" style="white-space: nowrap;">Budget Name</p>
+                                        <!-- Use label instead of h5 -->
+                                        <input type="text" name="budget_name" class="input">
+                                    </div>
+                                </div>
+                                <div class="input-div-new">
+                                    <div class="div">
+                                        <p class="inputs-label">Date</p>
+                                        <!-- Use label instead of h5 -->
+                                        <input type="date" name="budget_date" class="input">
+                                    </div>
+                                </div>
+                                <div class="input-div-new">
+                                    <div class="div">
+                                        <p class="inputs-label"  style="white-space: nowrap;">Added Budget</p>
+                                        <!-- Use label instead of h5 -->
+                                        <input type="text" name="added_budget" class="input">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-add" value="Submit">Submit</button>
+                                <a href="{% url 'continuing_projects' %}"
+                                   class="btn-cancel"
+                                   style="color: white">Exit</a>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- OBLIGATION -->
+                    <div class="details" id="obligation">
+                        <div class="login-content">
+                            <form id="add-obligation-form"
+                                  action="{% url 'add_obligation' 'continuing' %}"
+                                  method="post">
+                                {% csrf_token %}
+                                <h2 class="title">Add Project Obligation</h2>
+                                <br>
+                                <br>
+                                <input type="hidden" name="entry-code" id="obligation-code">
+                                <div class="input-div-new">
+                                    <div class="div">
+                                        <p class="inputs-label"  style="white-space: nowrap;">Obligation Name</p>
+                                        <!-- Use label instead of h5 -->
+                                        <input type="text" name="obligation_name" class="input">
+                                    </div>
+                                </div>
+                                <div class="input-div-new">
+                                    <div class="div">
+                                        <p class="inputs-label">Date</p>
+                                        <!-- Use label instead of h5 -->
+                                        <input type="date" name="obligation_date" class="input">
+                                    </div>
+                                </div>
+                                <div class="input-div-new">
+                                    <div class="div">
+                                        <p class="inputs-label"  style="white-space: nowrap;">Obligation Spent</p>
+                                        <!-- Use label instead of h5 -->
+                                        <input type="text" name="obligation_input" class="input">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-add" value="Submit">Submit</button>
+                                <a href="{% url 'continuing_projects' %}"
+                                   class="btn-cancel"
+                                   style="text-decoration: none;
+                                          color: white">Exit</a>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Delete -->
+                    <div class="details" id="delete">
+                        <div class="login-content">
+                            <form id="deleteForm"
+                                  action="{% url 'delete_entry' 'continuing' %}"
+                                  method="post">
+                                {% csrf_token %}
+                                <h2 class="title">Delete Project</h2>
+                                <br>
+                                <br>
+                                <div class="input-div-new">
+                                    <div class="div">
+                                        <label for="delete-code" style="white-space: nowrap;">Entry Code</label>
+                                        <input type="text"
+                                               name="entry_code"
+                                               id="delete-code"
+                                               readonly
+                                               placeholder="1-121"
+                                               class="input">
+                                    </div>
+                                </div>
+                                <!-- No need for a submit button here -->
+                                <button type="button" onclick="confirmDelete()" class="btn-add">Delete</button>
+                                <a href="{% url 'continuing_projects' %}"
+                                   class="btn-cancel"
+                                   style="text-decoration: none;
+                                          color: white">Exit</a>
+                            </form>
+                        </div>
+                    </div>
+                    <!------------------------------------------------------ JAVASCRIPT-------------------------------------------------->
+                    <!-- PIE CHART JS -->
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                    <script>
       document.addEventListener('DOMContentLoaded', function() {
         var chartContainers = document.querySelectorAll('.chart-container');
         chartContainers.forEach(function(container) {
@@ -544,10 +713,10 @@
           });
         });
       });
-    </script>
-    <!-- Details js -->
-     <!-- Add this in your HTML template where you include scripts -->
-    <script>
+                    </script>
+                    <!-- Details js -->
+                    <!-- Add this in your HTML template where you include scripts -->
+                    <script>
       function showDetails(code) {
         document.getElementById('customers_table').style.filter = 'blur(10px)';
         document.getElementById('overlay').style.display = 'block';
@@ -558,9 +727,9 @@
         document.getElementById('details-' + code).style.display = 'block';
         document.getElementById('details').style.display = 'block';
       }
-    </script>
-    <!-- Update js -->
-    <script>
+                    </script>
+                    <!-- Update js -->
+                    <script>
       function showUpdateForm(code) {
         var allUpdateForms = document.querySelectorAll('[id^="updateForm_"]');
         allUpdateForms.forEach(function(form) {
@@ -574,8 +743,8 @@
         document.getElementById('customers_table').style.filter = 'blur(10px)';
         document.getElementById('overlay').style.display = 'block';
       }
-    </script>
-    <script>
+                    </script>
+                    <script>
       // Function to handle form submission
       function handleSubmit(event) {
         event.preventDefault(); // Prevent default form submission
@@ -619,17 +788,17 @@
         }
         return true; // Return true if all validations pass
       }
-    </script>
-    <!-- Budget js -->
-    <script>
+                    </script>
+                    <!-- Budget js -->
+                    <script>
       function showAddBudget(budget_code) {
         document.getElementById('budget-code').value = budget_code;
         document.getElementById('customers_table').style.filter = 'blur(10px)';
         document.getElementById('budget').style.display = 'block';
         document.getElementById('overlay').style.display = 'block';
       }
-    </script>
-    <script>
+                    </script>
+                    <script>
       document.addEventListener('DOMContentLoaded', function() {
         // Get the form element
         var form = document.getElementById('add-budget-form');
@@ -654,17 +823,17 @@
           });
         });
       });
-    </script>
-    <!-- Obligation js -->
-    <script>
+                    </script>
+                    <!-- Obligation js -->
+                    <script>
       function showAddObligationForm(entryCode) {
         document.getElementById('obligation-code').value = entryCode;
         document.getElementById('obligation').style.display = 'block';
         document.getElementById('customers_table').style.filter = 'blur(10px)';
         document.getElementById('overlay').style.display = 'block';
       }
-    </script>
-    <script>
+                    </script>
+                    <script>
       document.addEventListener('DOMContentLoaded', function() {
         // Get the form element
         var form = document.getElementById('add-obligation-form');
@@ -689,17 +858,17 @@
           });
         });
       });
-    </script>
-    <!-- Delete js -->
-    <script>
+                    </script>
+                    <!-- Delete js -->
+                    <script>
       function showDeleteForm(code) {
         document.getElementById('delete-code').value = code;
         document.getElementById('delete').style.display = 'block';
         document.getElementById('customers_table').style.filter = 'blur(10px)';
         document.getElementById('overlay').style.display = 'block';
       }
-    </script>
-   <script>
+                    </script>
+                    <script>
     function confirmDelete() {
       // Show SweetAlert confirmation dialog
       Swal.fire({
@@ -718,8 +887,8 @@
         }
       });
     }
-  </script>     
-    <script>
+                    </script>
+                    <script>
       function hideOverlay() {
         document.getElementById('overlay').style.display = 'none';
         document.getElementById('customers_table').style.filter = 'none';
@@ -735,9 +904,8 @@
         if (deleteForm) deleteForm.style.display = 'none';
       }
       document.getElementById('overlay').addEventListener('click', hideOverlay);
-    </script>
-
-<script>
+                    </script>
+                    <script>
   document.addEventListener('DOMContentLoaded', function() {
       const form = document.getElementById('your-form-id'); // Replace with your form ID
   
@@ -761,13 +929,11 @@
           form.submit();
       });
   });
-  </script>
-
-  <!-- Add this in your HTML template -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script>
+                    </script>
+                    <!-- Add this in your HTML template -->
+                    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                    <script>
 $(document).ready(function() {
     $('#your-form-id').on('submit', function(event) {
         event.preventDefault(); // Prevent the default form submission
@@ -799,9 +965,8 @@ $(document).ready(function() {
         });
     });
 });
-</script>
-
-<script>
+                    </script>
+                    <script>
   // JavaScript function to toggle 'Select All' functionality
   function toggleSelectAll(selectAllCheckbox) {
       const checkboxes = document.querySelectorAll('.entry-checkbox');
@@ -809,6 +974,6 @@ $(document).ready(function() {
           checkbox.checked = selectAllCheckbox.checked;
       });
   }
-</script>
-  </body>
-</html>
+                    </script>
+                </body>
+            </html>

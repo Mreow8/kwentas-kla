@@ -369,19 +369,20 @@ def handle_entries(request, template_name):
 
         
     })
+@login_required
 def obligations(request):
     return handle_entries(request, 'KwentasApp/obligations.html')
-
+@login_required
 def disbursements(request):
     return handle_entries(request, 'KwentasApp/disbursements.html')
-
+@login_required
 def procurements(request):
     
     return handle_entries(request, 'KwentasApp/procurements.html')
-
+@login_required
 def check_payment(request):
     return handle_entries(request, 'KwentasApp/check_payment.html')
-
+@login_required
 def add_obligation(request, project_type):
     if request.method == 'POST':
         entry_key = request.POST.get('entry-code')

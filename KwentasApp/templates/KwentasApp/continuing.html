@@ -1,245 +1,189 @@
-{% load humanize %} {% load static tailwind_tags %}
+{% load humanize %}
+{% load static tailwind_tags %}
 <!DOCTYPE html>
-<html lang="en"> {% csrf_token %} <head>
-    <meta charset="UTF-8">
-    <link rel="shortcut icon" type="x-icon" href="{% static 'KwentasApp/img/logobrowser.jpg' %}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Continuing Projects</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'KwentasApp/css/continuing.css' %}">
-    {% tailwind_css %}
-  </head>
-  <body>
-    <div class="overlay" id="overlay"></div>
-    
-    <!-- Update the flex container structure -->
-    <div class="flex h-screen">
-        <!-- Sidebar - Made responsive -->
-
-        {% include 'KwentasApp/partials/aside.html' %}
-
-        <!-- Main Content - Made responsive -->
-        <main class="flex-1 transition-margin duration-300 ml-0 md:ml-64 min-h-screen bg-gray-100 dark:bg-gray-900">
-            <div class="p-2 sm:p-4 md:p-8 w-full max-w-[100vw] overflow-hidden">
-                <!-- Mobile Header with Menu Button -->
-                <div class="md:hidden mb-4 flex items-center">
-                    <button id="mobileSidebarToggle" class="p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-                    </button>
-                    <h1 class="ml-2 text-xl font-semibold">Continuing Projects</h1>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4"> <!-- Grid container -->
-                  <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-800 dark:border-neutral-700 p-4"> <!-- Adjusted padding -->
-                      <div class="flex items-center justify-between">
-                          <div>
-                              <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">
-                                  Continuing Projects
-                              </p>
-                              <h2 class="text-xl font-medium text-gray-800 dark:text-neutral-200">
-                                {% if matched_entries_below_2024 %}
-                                {{ matched_entries_below_2024|length }} Projects
-                            {% elif page_obj %}
-                                {{ page_obj|length }} Projects  
-                            {% else %}
-                                0 Projects
-                            {% endif %}
-                            under 20% Local Development Fund
-                              </h2>
-                          </div>
-                      </div>
-                  </div>
-              
-                  <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-800 dark:border-neutral-700 p-4"> <!-- Adjusted padding -->
-                      <div class="flex items-center justify-between">
-                          <div>
-                              <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">
-                                  Project Remarks
-                              </p>
-                              <h2 class="text-xl font-medium text-gray-800 dark:text-neutral-200">
-                                  {{ awarded_count }} Projects Awarded Already
-                              </h2>
-                          </div>
-                          <div class="hs-tooltip">
-                          </div>
-                      </div>
-                  </div>
-              </div>
-
-                <!-- Card Container - Made responsive -->
-                <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg mt-3 p-3 sm:p-4 md:p-6 flex flex-col justify-between min-h-[90vh] w-full"> <!-- Adjusted width -->
-                    <!-- Page Header -->
-                    <div class="mb-4">
-                        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">Continuing Projects</h1>
-                        <div class="flex items-center gap-4">
-                            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Manage and monitor ongoing project details</p>
-                        </div>
+<html lang="en">
+    {% csrf_token %}
+    <head>
+        <meta charset="UTF-8">
+        <link rel="shortcut icon"
+              type="x-icon"
+              href="{% static 'KwentasApp/img/logobrowser.jpg' %}">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Continuing Projects</title>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+              rel="stylesheet">
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+        <link rel="stylesheet"
+              type="text/css"
+              href="{% static 'KwentasApp/css/continuing.css' %}">
+        {% tailwind_css %}
+    </head>
+    <body>
+        <div class="overlay" id="overlay"></div>
+        <!-- Update the flex container structure -->
+        <div class="flex h-screen">
+            <!-- Sidebar - Made responsive -->
+            {% include 'KwentasApp/partials/aside.html' %}
+            <!-- Main Content - Made responsive -->
+            <main class="flex-1 transition-margin duration-300 ml-0 md:ml-64 min-h-screen bg-gray-100 dark:bg-gray-900">
+                <div class="p-2 sm:p-4 md:p-8 w-full max-w-[100vw] overflow-hidden">
+                    <!-- Mobile Header with Menu Button -->
+                    <div class="md:hidden mb-4 flex items-center">
+                        <button id="mobileSidebarToggle"
+                                class="p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                        <h1 class="ml-2 text-xl font-semibold">Continuing Projects</h1>
                     </div>
-
-                    <!-- Controls Section - Made responsive -->
-                    <div class="mb-4 sm:mb-6 grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-4">
-                        <!-- Sort -->
-                        <div class="relative w-full">
-                            <form method="GET" action="" class="w-full">
-                                <select name="sort" id="sort" onchange="this.form.submit()" 
-                                        class="w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                    <option value="" {% if not sort_option %}selected{% endif %}>Sort by</option>
-                                    <option value="recent" {% if sort_option == 'recent' %}selected{% endif %}>Recently Added</option>
-                                    <option value="oldest" {% if sort_option == 'oldest' %}selected{% endif %}>Oldest Added</option>
-                                </select>
-                            </form>
-                        </div>
-
-                        <!-- Search -->
-                        <div class="relative col-span-1 md:col-span-2 w-full">
-                            <form method="GET" action="{% url 'search_projects' 'continuing' %}" class="w-full">
-                                <div class="relative">
-                                    <input type="text" 
-                                           id="search-input" 
-                                           name="query" 
-                                           class="w-full pl-10 pr-4 py-2.5 text-gray-700 bg-white border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-sm hover:border-gray-400 transition-colors duration-200"
-                                           placeholder="Search Continuing Projects...">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                            </form>
-                            <div id="search-results"></div>
-                        </div>
-                    </div>
-
-                    <!-- Table Section - Made responsive -->
-                    <div class="mb-4 sm:mb-6 flex-grow overflow-hidden">
-                        <div class="relative w-full overflow-x-auto" style="min-height: 65vh;">
-                            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 table-auto">
-                                <thead class="text-xs text-gray-700 uppercase bg-gray-50/50 dark:bg-gray-700/50 dark:text-gray-400">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 w-1/2 break-words whitespace-normal">PPA</th>
-                                        <th scope="col" class="px-6 py-3 w-1/4 hidden md:table-cell break-words whitespace-normal">Implementing Unit</th>
-                                        <th scope="col" class="px-6 py-3 w-1/4 break-words whitespace-normal">Code</th>
-                                        <th scope="col" class="px-6 py-3 w-1/4 break-words whitespace-normal">Remarks</th>
-                                        {% if request.user.is_superuser %}
-                                            <th scope="col" class="px-6 py-3 w-1/4 break-words whitespace-normal">Add</th>
-                                            <th scope="col" class="px-6 py-3 w-1/4 break-words whitespace-normal">Action</th>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Grid container -->
+                        <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-800 dark:border-neutral-700 p-4">
+                            <!-- Adjusted padding -->
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">Continuing Projects</p>
+                                    <h2 class="text-xl font-medium text-gray-800 dark:text-neutral-200">
+                                        {% if matched_entries_below_2024 %}
+                                            {{ matched_entries_below_2024|length }} Projects
+                                        {% elif page_obj %}
+                                            {{ page_obj|length }} Projects
+                                        {% else %}
+                                            0 Projects
                                         {% endif %}
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                    {% if matched_entries_below_2024 %}
-                                        {% for entry in matched_entries_below_2024 %}
-                                            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-normal break-words dark:text-white" 
-                                                    onclick="showDetails('{{ entry.code }}', event)">
-                                                    {{ entry.ppa }}
-                                                </th>
-                                                <td class="px-6 py-4" onclick="showDetails('{{ entry.code }}', event)">
-                                                    {{ entry.implementing_unit }}
-                                                </td>
-                                                <td class="px-6 py-4 flex items-center gap-2" onclick="showDetails('{{ entry.code }}', event)">
-                                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
-                                                    </svg>
-                                                    {{ entry.code }}
-                                                </td>
-                                                <td class="px-6 py-4" onclick="showDetails('{{ entry.code }}', event)">
-                                                    <span class="px-2.5 py-1 text-xs font-medium rounded-full
-                                                        {% if entry.remarks == 'Awarded Already' %}
-                                                            bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
-                                                        {% elif entry.remarks == 'Finished Already' %}
-                                                            bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300
-                                                        {% else %}
-                                                            bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300
-                                                        {% endif %}
-                                                    ">
-                                                        {{ entry.remarks }}
-                                                    </span>
-                                                </td>
-                                                {% if request.user.is_superuser %}
-                                                    <td class="px-6 py-4">
-                                                        {% if entry.is_awarded %}
-                                                            <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2 mb-2" onclick="showAddObligationForm('{{ entry.code }}')">
-                                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                                                </svg>
-                                                                Obligation
-                                                            </a>
-                                                            <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2" onclick="showAddBudget('{{ entry.code }}')">
-                                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                                </svg>
-                                                                Budget
-                                                            </a>
-                                                        {% else %}
-                                                            Project needs to be Awarded
-                                                        {% endif %}
-                                                    </td>
-                                                    <td class="px-6 py-4">
-                                                        <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2 mb-2" onclick="showUpdateForm('{{ entry.code }}')">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                            </svg>
-                                                            Update
-                                                        </a>
-                                                        <a href="#" class="font-medium text-red-600 dark:text-red-500 hover:underline flex items-center gap-2" onclick="showDeleteForm('{{ entry.code }}')">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                            </svg>
-                                                            Delete
-                                                        </a>
-                                                    </td>
-                                                {% endif %}
-                                            </tr>
-                                        {% endfor %}
-                                    {% else %}
-                                        {% if page_obj %}
-                                            {% for entry in page_obj %}
-                                                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white" onclick="showDetails('{{ entry.code }}', event)">
+                                        under 20% Local Development Fund
+                                    </h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-800 dark:border-neutral-700 p-4">
+                            <!-- Adjusted padding -->
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">Project Remarks</p>
+                                    <h2 class="text-xl font-medium text-gray-800 dark:text-neutral-200">{{ awarded_count }} Projects Awarded Already</h2>
+                                </div>
+                                <div class="hs-tooltip"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card Container - Made responsive -->
+                    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg mt-3 p-3 sm:p-4 md:p-6 flex flex-col justify-between min-h-[90vh] w-full">
+                        <!-- Adjusted width -->
+                        <!-- Page Header -->
+                        <div class="mb-4">
+                            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">Continuing Projects</h1>
+                            <div class="flex items-center gap-4">
+                                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Manage and monitor ongoing project details</p>
+                            </div>
+                        </div>
+                        <!-- Controls Section - Made responsive -->
+                        <div class="mb-4 sm:mb-6 grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-4">
+                            <!-- Sort -->
+                            <div class="relative w-full">
+                                <form method="GET" action="" class="w-full">
+                                    <select name="sort"
+                                            id="sort"
+                                            onchange="this.form.submit()"
+                                            class="w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                        <option value="" {% if not sort_option %}selected{% endif %}>Sort by</option>
+                                        <option value="recent" {% if sort_option == 'recent' %}selected{% endif %}>Recently Added</option>
+                                        <option value="oldest" {% if sort_option == 'oldest' %}selected{% endif %}>Oldest Added</option>
+                                    </select>
+                                </form>
+                            </div>
+                            <!-- Search -->
+                            <div class="relative col-span-1 md:col-span-2 w-full">
+                                <form method="GET"
+                                      action="{% url 'search_projects' 'continuing' %}"
+                                      class="w-full">
+                                    <div class="relative">
+                                        <input type="text"
+                                               id="search-input"
+                                               name="query"
+                                               class="w-full pl-10 pr-4 py-2.5 text-gray-700 bg-white border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-sm hover:border-gray-400 transition-colors duration-200"
+                                               placeholder="Search Continuing Projects...">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400"
+                                                 fill="none"
+                                                 stroke="currentColor"
+                                                 viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </form>
+                                <div id="search-results"></div>
+                            </div>
+                        </div>
+                        <!-- Table Section - Made responsive -->
+                        <div class="mb-4 sm:mb-6 flex-grow overflow-hidden">
+                            <div class="relative w-full overflow-x-auto" style="min-height: 65vh;">
+                                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 table-auto ">
+                                    <thead class="text-xs text-gray-700 uppercase bg-gray-50/50 dark:bg-gray-700/50 dark:text-gray-400">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 w-1/2 break-words whitespace-normal">PPA</th>
+                                            <th scope="col"
+                                                class="px-6 py-3 w-1/4 hidden md:table-cell break-words whitespace-normal">
+                                                Implementing Unit
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 w-1/4 break-words whitespace-normal">Code</th>
+                                            <th scope="col" class="px-6 py-3 w-1/4 break-words whitespace-normal">Remarks</th>
+                                            {% if request.user.is_superuser %}
+                                                <th scope="col" class="px-6 py-3 w-1/4 break-words whitespace-normal">Add</th>
+                                                <th scope="col" class="px-6 py-3 w-1/4 break-words whitespace-normal">Action</th>
+                                            {% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                        {% if matched_entries_below_2024 %}
+                                            {% for entry in matched_entries_below_2024 %}
+                                                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                    <th scope="row"
+                                                        class="px-6 py-4 font-medium text-gray-900 whitespace-normal break-words dark:text-white text-sm sm:text-base w-full max-w-xs sm:max-w-none whitespace-normal"
+                                                        style="word-wrap: break-word;
+                                                               white-space: initial"
+                                                        onclick="showDetails('{{ entry.code }}', event)">
                                                         {{ entry.ppa }}
                                                     </th>
-                                                    <td class="px-6 py-4" onclick="showDetails('{{ entry.code }}', event)">
-                                                        {{ entry.implementing_unit }}
-                                                    </td>
-                                                    <td class="px-6 py-4 flex items-center gap-2" onclick="showDetails('{{ entry.code }}', event)">
-                                                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                                                    <td class="px-6 py-4" onclick="showDetails('{{ entry.code }}', event)">{{ entry.implementing_unit }}</td>
+                                                    <td class="px-6 py-4 flex items-center gap-2"
+                                                        onclick="showDetails('{{ entry.code }}', event)">
+                                                        <svg class="w-5 h-5 text-gray-500"
+                                                             fill="none"
+                                                             stroke="currentColor"
+                                                             viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
                                                         </svg>
                                                         {{ entry.code }}
                                                     </td>
                                                     <td class="px-6 py-4" onclick="showDetails('{{ entry.code }}', event)">
-                                                        <span class="px-2.5 py-1 text-xs font-medium rounded-full
-                                                            {% if entry.remarks == 'Awarded Already' %}
-                                                                bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
-                                                            {% elif entry.remarks == 'Finished Already' %}
-                                                                bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300
-                                                            {% else %}
-                                                                bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300
-                                                            {% endif %}
-                                                        ">
+                                                        <span class="px-2.5 py-1 text-xs font-medium rounded-full {% if entry.remarks == 'Awarded Already' %} bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 {% elif entry.remarks == 'Finished Already' %} bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 {% else %} bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 {% endif %} ">
                                                             {{ entry.remarks }}
                                                         </span>
                                                     </td>
                                                     {% if request.user.is_superuser %}
                                                         <td class="px-6 py-4">
                                                             {% if entry.is_awarded %}
-                                                                <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2 mb-2" onclick="showAddObligationForm('{{ entry.code }}')">
+                                                                <a href="#"
+                                                                   class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2 mb-2"
+                                                                   onclick="showAddObligationForm('{{ entry.code }}')">
                                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                                     </svg>
                                                                     Obligation
                                                                 </a>
-                                                                <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2" onclick="showAddBudget('{{ entry.code }}')">
+                                                                <a href="#"
+                                                                   class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2"
+                                                                   onclick="showAddBudget('{{ entry.code }}')">
                                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                                     </svg>
                                                                     Budget
                                                                 </a>
@@ -248,15 +192,19 @@
                                                             {% endif %}
                                                         </td>
                                                         <td class="px-6 py-4">
-                                                            <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2 mb-2" onclick="showUpdateForm('{{ entry.code }}')">
+                                                            <a href="#"
+                                                               class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2 mb-2"
+                                                               onclick="showUpdateForm('{{ entry.code }}')">
                                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                                 </svg>
                                                                 Update
                                                             </a>
-                                                            <a href="#" class="font-medium text-red-600 dark:text-red-500 hover:underline flex items-center gap-2" onclick="showDeleteForm('{{ entry.code }}')">
+                                                            <a href="#"
+                                                               class="font-medium text-red-600 dark:text-red-500 hover:underline flex items-center gap-2"
+                                                               onclick="showDeleteForm('{{ entry.code }}')">
                                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                                 </svg>
                                                                 Delete
                                                             </a>
@@ -265,324 +213,524 @@
                                                 </tr>
                                             {% endfor %}
                                         {% else %}
-                                            <tr>
-                                                <td colspan="6">No projects found.</td>
-                                            </tr>
+                                            {% if page_obj %}
+                                                {% for entry in page_obj %}
+                                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                                        <th scope="row"
+                                                            class="px-6 py-4 font-medium text-gray-900 dark:text-white"
+                                                            onclick="showDetails('{{ entry.code }}', event)">
+                                                            {{ entry.ppa }}
+                                                        </th>
+                                                        <td class="px-6 py-4" onclick="showDetails('{{ entry.code }}', event)">{{ entry.implementing_unit }}</td>
+                                                        <td class="px-6 py-4 flex items-center gap-2"
+                                                            onclick="showDetails('{{ entry.code }}', event)">
+                                                            <svg class="w-5 h-5 text-gray-500"
+                                                                 fill="none"
+                                                                 stroke="currentColor"
+                                                                 viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                                                            </svg>
+                                                            {{ entry.code }}
+                                                        </td>
+                                                        <td class="px-6 py-4" onclick="showDetails('{{ entry.code }}', event)">
+                                                            <span class="px-2.5 py-1 text-xs font-medium rounded-full {% if entry.remarks == 'Awarded Already' %} bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 {% elif entry.remarks == 'Finished Already' %} bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 {% else %} bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 {% endif %} ">
+                                                                {{ entry.remarks }}
+                                                            </span>
+                                                        </td>
+                                                        {% if request.user.is_superuser %}
+                                                            <td class="px-6 py-4">
+                                                                {% if entry.is_awarded %}
+                                                                    <a href="#"
+                                                                       class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2 mb-2"
+                                                                       onclick="showAddObligationForm('{{ entry.code }}')">
+                                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                        </svg>
+                                                                        Obligation
+                                                                    </a>
+                                                                    <a href="#"
+                                                                       class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2"
+                                                                       onclick="showAddBudget('{{ entry.code }}')">
+                                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                        </svg>
+                                                                        Budget
+                                                                    </a>
+                                                                {% else %}
+                                                                    Project needs to be Awarded
+                                                                {% endif %}
+                                                            </td>
+                                                            <td class="px-6 py-4">
+                                                                <a href="#"
+                                                                   class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2 mb-2"
+                                                                   onclick="showUpdateForm('{{ entry.code }}')">
+                                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                    </svg>
+                                                                    Update
+                                                                </a>
+                                                                <a href="#"
+                                                                   class="font-medium text-red-600 dark:text-red-500 hover:underline flex items-center gap-2"
+                                                                   onclick="showDeleteForm('{{ entry.code }}')">
+                                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                    </svg>
+                                                                    Delete
+                                                                </a>
+                                                            </td>
+                                                        {% endif %}
+                                                    </tr>
+                                                {% endfor %}
+                                            {% else %}
+                                                <tr>
+                                                    <td colspan="6">No projects found.</td>
+                                                </tr>
+                                            {% endif %}
                                         {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Pagination - Made responsive -->
+                        <div class="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <!-- Back Button -->
+                            <div class="w-full sm:w-auto order-2 sm:order-1">
+                                <a href="{% url 'homepage' %}"
+                                   class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+                                    <svg class="w-5 h-5 mr-2"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                    </svg>
+                                    Back to Homepage
+                                </a>
+                            </div>
+                            <!-- Pagination Controls -->
+                            <nav class="w-full sm:w-auto order-1 sm:order-2">
+                                <ul class="flex items-center justify-center sm:justify-end -space-x-px">
+                                    {% if page_obj.has_previous %}
+                                        <li>
+                                            <a href="?page=1"
+                                               class="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">First</a>
+                                        </li>
+                                        <li>
+                                            <a href="?page={{ page_obj.previous_page_number }}"
+                                               class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
+                                        </li>
                                     {% endif %}
-                                </tbody>
-                            </table>
+                                    <li>
+                                        <span class="px-3 py-2 leading-tight text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">
+                                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                        </span>
+                                    </li>
+                                    {% if page_obj.has_next %}
+                                        <li>
+                                            <a href="?page={{ page_obj.next_page_number }}"
+                                               class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
+                                        </li>
+                                        <li>
+                                            <a href="?page={{ page_obj.paginator.num_pages }}"
+                                               class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Last</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
                         </div>
                     </div>
-
-                    <!-- Pagination - Made responsive -->
-                    <div class="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <!-- Back Button -->
-                        <div class="w-full sm:w-auto order-2 sm:order-1">
-                            <a href="{% url 'homepage' %}" 
-                               class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                                </svg>
-                                Back to Homepage
-                            </a>
+                    <!-- End of card-like container -->
+                </div>
+            </main>
+        </div>
+        <!-- DETAILS  -->
+        <div class="details" id="details">
+            <a href="{% url 'continuing_projects' %}" class="block text-right">
+                <i class="material-icons x text-gray-600 hover:text-red-500" id="exit">close</i>
+            </a>
+            <a href="{% url 'continuing_projects' %}" class="block text-center">
+                <h1 class="form-title text-2xl font-bold text-gray-800 hover:text-blue-600">PROJECT DETAILS</h1>
+            </a>
+            <ul>
+                {% for entry in all_entries %}
+                    <li class="entry-item hidden" id="details-{{ entry.code }}">
+                        <div class="details-container bg-white shadow-lg rounded-lg p-6 mb-6">
+                            <!-- Main User Info Section -->
+                            <div class="main-user-info grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">PPA</p>
+                                    <p id="fullName" class="user-text text-gray-800 font-semibold">{{ entry.ppa }}</p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Implementing Unit</p>
+                                    <p id="username" class="user-text text-gray-800 font-semibold">{{ entry.implementing_unit }}</p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Location</p>
+                                    <p id="email" class="user-text text-gray-800 font-semibold">{{ entry.location }}</p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Appropriation</p>
+                                    <p id="phoneNumber" class="user-text text-gray-800 font-semibold">₱{{ entry.appropriation|intcomma }}</p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Remarks</p>
+                                    <p id="password" class="user-text text-gray-800 font-semibold">{{ entry.remarks }}</p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Start Date</p>
+                                    <p id="confirmPassword" class="user-text text-gray-800 font-semibold">{{ entry.start_date }}</p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">End Date</p>
+                                    <p id="endDate" class="user-text text-gray-800 font-semibold">{{ entry.end_date }}</p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Code</p>
+                                    <p id="code" class="user-text text-gray-800 font-semibold">{{ entry.code }}</p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Services</p>
+                                    <p id="services" class="user-text text-gray-800 font-semibold">{{ entry.services }}</p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Year</p>
+                                    <p id="year" class="user-text text-gray-800 font-semibold">{{ entry.year }}</p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Total Budget</p>
+                                    <p id="totalBudget" class="user-text text-gray-800 font-semibold">₱{{ entry.overall_budget|intcomma }}</p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Total Added Budget</p>
+                                    <p id="totalSpent" class="user-text text-gray-800 font-semibold">₱{{ entry.added_budget|intcomma }}</p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Remaining Balance</p>
+                                    <p id="remainingBalance" class="user-text text-gray-800 font-semibold">
+                                        ₱{{ entry.remaining_total_balance|intcomma }}
+                                    </p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Remaining Obligation</p>
+                                    <p id="remainingObligations"
+                                       class="user-text text-gray-800 font-semibold">
+                                        ₱{{ entry.remaining_obligations|intcomma }}
+                                    </p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Total Obligation</p>
+                                    <p id="totalObligations" class="user-text text-gray-800 font-semibold">₱{{ entry.total_obligations|intcomma }}</p>
+                                </div>
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Total Spent</p>
+                                    <p id="totalAddedBudget" class="user-text text-gray-800 font-semibold">₱{{ entry.total_disbursements|intcomma }}</p>
+                                </div>
+                            </div>
+                            <!-- Chart Section -->
+                            <div class="chart-container mt-6"
+                                 data-entry-code="{{ entry.code }}"
+                                 id="chart">
+                                <div class="user-input-box">
+                                    <p class="label text-sm font-medium text-gray-500">Utilization Rate:</p>
+                                    <span class="utilizationRate text-gray-800 font-semibold">{{ entry.utilization_rate|floatformat:"-2" }}%</span>
+                                </div>
+                                <canvas class="pie-chart"></canvas>
+                            </div>
                         </div>
-
-                        <!-- Pagination Controls -->
-                        <nav class="w-full sm:w-auto order-1 sm:order-2">
-                            <ul class="flex items-center justify-center sm:justify-end -space-x-px">
-                                {% if page_obj.has_previous %}
-                                    <li>
-                                        <a href="?page=1" class="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">First</a>
-                                    </li>
-                                    <li>
-                                        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
-                                    </li>
-                                {% endif %}
-
-                                <li>
-                                    <span class="px-3 py-2 leading-tight text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">
-                                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                                    </span>
-                                </li>
-
-                                {% if page_obj.has_next %}
-                                    <li>
-                                        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
-                                    </li>
-                                    <li>
-                                        <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Last</a>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
+                        <h1 class="form-title text-2xl font-bold text-gray-800 hover:text-blue-600">FINANCIAL DETAILS</h1>
+                        <div class="mx-auto max-w-2xl">
+                            <div class="space-y-6">
+                                <!-- Budget Section -->
+                                <div class="rounded-xl bg-white shadow-[0_10px_100px_10px_rgba(0,0,0,0.05)]">
+                                    <div class="p-6 border-b">
+                                        <h2 class="text-xl font-semibold text-gray-900">Added Budget</h2>
+                                    </div>
+                                    <div class="px-6 py-4">
+                                        <ul class="space-y-4">
+                                            {% for budget in entry.budget_data %}
+                                                <li class="flex justify-between items-center text-lg text-gray-800 gap-4 border-b py-3">
+                                                    <span class="font-medium">{{ budget.name|intcomma }}</span>
+                                                    <span class="text-blue-600 font-semibold">₱{{ budget.added_budget|intcomma }}</span>
+                                                    <span class="text-sm text-gray-500">{{ budget.date }}</span>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <!-- Obligation Section -->
+                                <div class="rounded-xl bg-white shadow-[0_10px_100px_10px_rgba(0,0,0,0.05)]">
+                                    <div class="p-6 border-b">
+                                        <h2 class="text-xl font-semibold text-gray-900">Added Obligation</h2>
+                                    </div>
+                                    <div class="px-6 py-4">
+                                        <ul class="space-y-4">
+                                            {% for obligation in entry.obligation %}
+                                                <li class="flex justify-between items-center text-lg text-gray-800 gap-4 border-b py-3">
+                                                    <span class="font-medium">{{ obligation.name }}</span>
+                                                    <span class="text-blue-600 font-semibold">₱{{ obligation.obligation|intcomma }}</span>
+                                                    <span class="text-sm text-gray-500">{{ obligation.date }}</span>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <!-- Disbursement Section -->
+                                <div class="rounded-xl bg-white shadow-[0_10px_100px_10px_rgba(0,0,0,0.05)]">
+                                    <div class="p-6 border-b">
+                                        <h2 class="text-xl font-semibold text-gray-900">Added Disbursement</h2>
+                                    </div>
+                                    <div class="px-6 py-4">
+                                        <ul class="space-y-4">
+                                            {% for disbursement in entry.disbursement %}
+                                                <li class="flex justify-between items-center text-lg text-gray-800 gap-4 border-b py-3">
+                                                    <span class="font-medium">{{ disbursement.name }}</span>
+                                                    <span class="text-blue-600 font-semibold">₱{{ disbursement.disbursement|intcomma }}</span>
+                                                    <span class="text-sm text-gray-500">{{ disbursement.date }}</span>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <!-- UPDATE -->
+        <div class="details" id="update">
+            <a href="{% url 'continuing_projects' %}"></a>
+            <a href="{% url 'continuing_projects' %}">
+                <h1 class="form-title text-2xl font-semibold text-gray-900 dark:text-white mb-6">Update Project</h1>
+            </a>
+            {% for entry in all_entries %}
+                <form id="updateForm_{{ entry.code }}"
+                      action="{% url 'update_entry' 'continuing' %}"
+                      method="post"
+                      onsubmit="handleSubmit(event)"
+                      class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-300 dark:border-gray-700 p-4 mb-4 border-2 border-gray-300 dark:border-gray-600">
+                    <!-- Added border-2 -->
+                    {% csrf_token %}
+                    <input type="hidden" name="entry_code" value="{{ entry.code }}">
+                    <div class="main-user-info" id="main-update">
+                        <div class="user-input-box mb-4">
+                            <label for="ppa_{{ entry.code }}"
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300">PPA</label>
+                            <input type="text"
+                                   id="ppa_{{ entry.code }}"
+                                   name="ppa"
+                                   class="user-text block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                   value="{{ entry.ppa }}">
+                        </div>
+                        <div class="user-input-box mb-4">
+                            <label for="implementing_unit_{{ entry.code }}"
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Implementing Unit
+                            </label>
+                            <div class="select-container">
+                                <select id="implementing_unit_{{ entry.code }}"
+                                        name="implementing_unit"
+                                        class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <option value="" disabled selected>{{ entry.implementing_unit }}</option>
+                                    <option value="Mayors Office"
+                                            {% if entry.implementing_unit == "Mayors Office" %}selected{% endif %}>
+                                        Mayor's Office
+                                    </option>
+                                    <option value="Tourism Office"
+                                            {% if entry.implementing_unit == "Tourism Office" %}selected{% endif %}>
+                                        Tourism Office
+                                    </option>
+                                    <option value="BAC Office"
+                                            {% if entry.implementing_unit == "BAC Office" %}selected{% endif %}>
+                                        BAC Office
+                                    </option>
+                                    <option value="Engineering Office"
+                                            {% if entry.implementing_unit == "Engineering Office" %}selected{% endif %}>
+                                        Engineering Office
+                                    </option>
+                                    <option value="PESO Office"
+                                            {% if entry.implementing_unit == "PESO Office" %}selected{% endif %}>
+                                        PESO Office
+                                    </option>
+                                    <option value="MDRRMO"
+                                            {% if entry.implementing_unit == "MDRRMO" %}selected{% endif %}>
+                                        MDRRMO
+                                    </option>
+                                    <option value="Sanguniang Barangay Office"
+                                            {% if entry.implementing_unit == "Sanguniang Barangay Office" %}selected{% endif %}>
+                                        Sanguniang Barangay Office
+                                    </option>
+                                    <option value="MPDC"
+                                            {% if entry.implementing_unit == "MPDC" %}selected{% endif %}>MPDC</option>
+                                    <option value="MCR Office"
+                                            {% if entry.implementing_unit == "MCR Office" %}selected{% endif %}>
+                                        MCR Office
+                                    </option>
+                                    <option value="MBO Office"
+                                            {% if entry.implementing_unit == "MBO Office" %}selected{% endif %}>
+                                        MBO Office
+                                    </option>
+                                    <option value="Accountant Office"
+                                            {% if entry.implementing_unit == "Accountant Office" %}selected{% endif %}>
+                                        Accountant Office
+                                    </option>
+                                    <option value="Assessor's Office"
+                                            {% if entry.implementing_unit == "Assessor's Office" %}selected{% endif %}>
+                                        Assessor's Office
+                                    </option>
+                                    <option value="MHO Office"
+                                            {% if entry.implementing_unit == "MHO Office" %}selected{% endif %}>
+                                        MHO Office
+                                    </option>
+                                    <option value="Parks & Plaza"
+                                            {% if entry.implementing_unit == "Parks & Plaza" %}selected{% endif %}>
+                                        Parks & Plaza
+                                    </option>
+                                    <option value="MSWD Office"
+                                            {% if entry.implementing_unit == "MSWD Office" %}selected{% endif %}>
+                                        MSWD Office
+                                    </option>
+                                    <option value="MENRO Office"
+                                            {% if entry.implementing_unit == "MENRO Office" %}selected{% endif %}>
+                                        MENRO Office
+                                    </option>
+                                    <option value="MO"
+                                            {% if entry.implementing_unit == "MO" %}selected{% endif %}>MO</option>
+                                    <option value="Streets & Bridges"
+                                            {% if entry.implementing_unit == "Streets & Bridges" %}selected{% endif %}>
+                                        Streets & Bridges
+                                    </option>
+                                    <option value="LDF"
+                                            {% if entry.implementing_unit == "LDF" %}selected{% endif %}>LDF</option>
+                                    <option value="Waterworks"
+                                            {% if entry.implementing_unit == "Waterworks" %}selected{% endif %}>
+                                        Waterworks
+                                    </option>
+                                    <option value="Markets"
+                                            {% if entry.implementing_unit == "Markets" %}selected{% endif %}>
+                                        Markets
+                                    </option>
+                                    <option value="Zero Waste"
+                                            {% if entry.implementing_unit == "Zero Waste" %}selected{% endif %}>
+                                        Zero Waste
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="user-input-box mb-4">
+                            <label for="location_{{ entry.code }}"
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
+                            <input type="text"
+                                   id="location_{{ entry.code }}"
+                                   name="location"
+                                   class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                   value="{{ entry.location }}">
+                        </div>
+                        <div class="user-input-box mb-4">
+                            <label for="remarks_{{ entry.code }}"
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300">Remarks</label>
+                            <select id="remarks_{{ entry.code }}"
+                                    name="remarks"
+                                    class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="" disabled selected>{{ entry.remarks }}</option>
+                                <option value="No PPMP/APP/POW"
+                                        {% if entry.remarks == "No PPMP/APP/POW" %}selected{% endif %}>
+                                    No PPMP/APP/POW
+                                </option>
+                                <option value="Awarded Already"
+                                        {% if entry.remarks == "Awarded Already" %}selected{% endif %}>
+                                    Awarded Already
+                                </option>
+                                <option value="Finished Already"
+                                        {% if entry.remarks == "Finished Already" %}selected{% endif %}>
+                                    Finished Already
+                                </option>
+                            </select>
+                        </div>
+                        <div class="user-input-box mb-4">
+                            <label for="start_date_{{ entry.code }}"
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Start Date
+                            </label>
+                            <input type="date"
+                                   id="start_date_{{ entry.code }}"
+                                   name="start_date"
+                                   class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                   value="{{ entry.start_date }}">
+                        </div>
+                        <div class="user-input-box mb-4">
+                            <label for="end_date_{{ entry.code }}"
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
+                            <input type="date"
+                                   id="end_date_{{ entry.code }}"
+                                   name="end_date"
+                                   class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                   value="{{ entry.end_date }}">
+                        </div>
+                        <div class="user-input-box mb-4">
+                            <label for="code_{{ entry.code }}"
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300">Code</label>
+                            <input type="text"
+                                   id="code_{{ entry.code }}"
+                                   name="code"
+                                   class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                   value="{{ entry.code }}">
+                        </div>
+                        <div class="user-input-box mb-4">
+                            <label for="services_{{ entry.code }}"
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300">Services</label>
+                            <select id="services_{{ entry.code }}"
+                                    name="services"
+                                    class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="" disabled selected>{{ entry.services }}</option>
+                                <option value="General"
+                                        {% if entry.services == "General" %}selected{% endif %}>General</option>
+                                <option value="Social" {% if entry.services == "Social" %}selected{% endif %}>Social</option>
+                                <option value="Economic"
+                                        {% if entry.services == "Economic" %}selected{% endif %}>Economic</option>
+                                <option value="Environmental"
+                                        {% if entry.services == "Environmental" %}selected{% endif %}>
+                                    Environmental
+                                </option>
+                            </select>
+                        </div>
+                        <div class="user-input-box mb-4">
+                            <label for="year_{{ entry.code }}"
+                                   class="block text-sm font-medium text-gray-700 dark:text-gray-300">Year</label>
+                            <input type="number"
+                                   id="year_{{ entry.code }}"
+                                   name="year"
+                                   class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                   value="{{ entry.year }}">
+                        </div>
                     </div>
-                </div> <!-- End of card-like container -->
-            </div>
-        </main>
-    </div>
-
-    <!-- DETAILS  -->
-    <div class="details" id="details">
-        <a href="{% url 'continuing_projects' %}" class="block text-right">
-          <i class="material-icons x text-gray-600 hover:text-red-500" id="exit">close</i>
-        </a>
-        <a href="{% url 'continuing_projects' %}" class="block text-center">
-          <h1 class="form-title text-2xl font-bold text-gray-800 hover:text-blue-600">PROJECT DETAILS</h1>
-        </a>
-        <ul>
-          {% for entry in all_entries %}
-          <li class="entry-item hidden" id="details-{{ entry.code }}">
-            <div class="details-container bg-white shadow-lg rounded-lg p-6 mb-6">
-              <!-- Main User Info Section -->
-              <div class="main-user-info grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">PPA</p>
-                  <p id="fullName" class="user-text text-gray-800 font-semibold">{{ entry.ppa }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Implementing Unit</p>
-                  <p id="username" class="user-text text-gray-800 font-semibold">{{ entry.implementing_unit }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Location</p>
-                  <p id="email" class="user-text text-gray-800 font-semibold">{{ entry.location }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Appropriation</p>
-                  <p id="phoneNumber" class="user-text text-gray-800 font-semibold">₱{{ entry.appropriation|intcomma }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Remarks</p>
-                  <p id="password" class="user-text text-gray-800 font-semibold">{{ entry.remarks }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Start Date</p>
-                  <p id="confirmPassword" class="user-text text-gray-800 font-semibold">{{ entry.start_date }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">End Date</p>
-                  <p id="endDate" class="user-text text-gray-800 font-semibold">{{ entry.end_date }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Code</p>
-                  <p id="code" class="user-text text-gray-800 font-semibold">{{ entry.code }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Services</p>
-                  <p id="services" class="user-text text-gray-800 font-semibold">{{ entry.services }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Year</p>
-                  <p id="year" class="user-text text-gray-800 font-semibold">{{ entry.year }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Total Budget</p>
-                  <p id="totalBudget" class="user-text text-gray-800 font-semibold">₱{{ entry.overall_budget|intcomma }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Total Added Budget</p>
-                  <p id="totalSpent" class="user-text text-gray-800 font-semibold">₱{{ entry.added_budget|intcomma }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Remaining Balance</p>
-                  <p id="remainingBalance" class="user-text text-gray-800 font-semibold">₱{{ entry.remaining_total_balance|intcomma }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Remaining Obligation</p>
-                  <p id="remainingObligations" class="user-text text-gray-800 font-semibold">₱{{ entry.remaining_obligations|intcomma }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Total Obligation</p>
-                  <p id="totalObligations" class="user-text text-gray-800 font-semibold">₱{{ entry.total_obligations|intcomma }}</p>
-                </div>
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Total Spent</p>
-                  <p id="totalAddedBudget" class="user-text text-gray-800 font-semibold">₱{{ entry.total_disbursements|intcomma }}</p>
-                </div>
-              </div>
-              
-              <!-- Chart Section -->
-              <div class="chart-container mt-6" data-entry-code="{{ entry.code }}" id="chart">
-                <div class="user-input-box">
-                  <p class="label text-sm font-medium text-gray-500">Utilization Rate:</p>
-                  <span class="utilizationRate text-gray-800 font-semibold">{{ entry.utilization_rate|floatformat:"-2" }}%</span>
-                </div>
-                <canvas class="pie-chart"></canvas>
-              </div>
-            </div>
-      
-            <h1 class="form-title text-2xl font-bold text-gray-800 hover:text-blue-600">FINANCIAL DETAILS</h1>
-
-            <div class="mx-auto max-w-2xl">
-                <div class="space-y-6">
-                  
-                  <!-- Budget Section -->
-                  <div class="rounded-xl bg-white shadow-[0_10px_100px_10px_rgba(0,0,0,0.05)]">
-                    <div class="p-6 border-b">
-                      <h2 class="text-xl font-semibold text-gray-900">Added Budget</h2>
+                    <div class="flex flex-col space-y-4 justify-end">
+                        <!-- Changed to flex-col for vertical stacking -->
+                        <button type="submit"
+                                class="w-full px-4 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 focus:outline-none">
+                            <svg class="w-5 h-5 mr-2"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Update
+                        </button>
+                        <a href="{% url 'continuing_projects' %}"
+                           class="btn-cancel bg-gray-100 text-gray-700 px-4 py-2 rounded-md shadow hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Exit
+                        </a>
                     </div>
-                    <div class="px-6 py-4">
-                      <ul class="space-y-4">
-                        {% for budget in entry.budget_data %}
-                        <li class="flex justify-between items-center text-lg text-gray-800 gap-4 border-b py-3">
-                          <span class="font-medium">{{ budget.name|intcomma }}</span>
-                          <span class="text-blue-600 font-semibold">₱{{ budget.added_budget|intcomma }}</span>
-                          <span class="text-sm text-gray-500">{{ budget.date }}</span>
-                        </li>
-                        {% endfor %}
-                      </ul>
-                    </div>
-                  </div>
-              
-                  <!-- Obligation Section -->
-                  <div class="rounded-xl bg-white shadow-[0_10px_100px_10px_rgba(0,0,0,0.05)]">
-                    <div class="p-6 border-b">
-                      <h2 class="text-xl font-semibold text-gray-900">Added Obligation</h2>
-                    </div>
-                    <div class="px-6 py-4">
-                      <ul class="space-y-4">
-                        {% for obligation in entry.obligation %}
-                        <li class="flex justify-between items-center text-lg text-gray-800 gap-4 border-b py-3">
-                          <span class="font-medium">{{ obligation.name }}</span>
-                          <span class="text-blue-600 font-semibold">₱{{ obligation.obligation|intcomma }}</span>
-                          <span class="text-sm text-gray-500">{{ obligation.date }}</span>
-                        </li>
-                        {% endfor %}
-                      </ul>
-                    </div>
-                  </div>
-              
-                  <!-- Disbursement Section -->
-                  <div class="rounded-xl bg-white shadow-[0_10px_100px_10px_rgba(0,0,0,0.05)]">
-                    <div class="p-6 border-b">
-                      <h2 class="text-xl font-semibold text-gray-900">Added Disbursement</h2>
-                    </div>
-                    <div class="px-6 py-4">
-                      <ul class="space-y-4">
-                        {% for disbursement in entry.disbursement %}
-                        <li class="flex justify-between items-center text-lg text-gray-800 gap-4 border-b py-3">
-                          <span class="font-medium">{{ disbursement.name }}</span>
-                          <span class="text-blue-600 font-semibold">₱{{ disbursement.disbursement|intcomma }}</span>
-                          <span class="text-sm text-gray-500">{{ disbursement.date }}</span>
-                        </li>
-                        {% endfor %}
-                      </ul>
-                    </div>
-                  </div>
-              
-                </div>
-              </div>
-              
-              
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-      
-    <!-- UPDATE -->
-    <div class="details" id="update">
-      <a href="{% url 'continuing_projects' %}"></a>
-      <a href="{% url 'continuing_projects' %}">
-          <h1 class="form-title text-2xl font-semibold text-gray-900 dark:text-white mb-6">Update Project</h1>
-      </a>
-      {% for entry in all_entries %}
-      <form id="updateForm_{{ entry.code }}" action="{% url 'update_entry' 'continuing' %}" method="post" onsubmit="handleSubmit(event)" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-300 dark:border-gray-700 p-4 mb-4 border-2 border-gray-300 dark:border-gray-600"> <!-- Added border-2 -->
-          {% csrf_token %}
-          <input type="hidden" name="entry_code" value="{{ entry.code }}">
-          <div class="main-user-info" id="main-update">
-              <div class="user-input-box mb-4">
-                  <label for="ppa_{{ entry.code }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">PPA</label>
-                  <input type="text" id="ppa_{{ entry.code }}" name="ppa" class="user-text block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" value="{{ entry.ppa }}">
-              </div>
-              <div class="user-input-box mb-4">
-                  <label for="implementing_unit_{{ entry.code }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Implementing Unit</label>
-                  <div class="select-container">
-                      <select id="implementing_unit_{{ entry.code }}" name="implementing_unit" class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                          <option value="" disabled selected>{{ entry.implementing_unit }}</option>
-                          <option value="Mayors Office" {% if entry.implementing_unit == "Mayors Office" %}selected{% endif %}>Mayor's Office</option>
-                          <option value="Tourism Office" {% if entry.implementing_unit == "Tourism Office" %}selected{% endif %}>Tourism Office</option>
-                          <option value="BAC Office" {% if entry.implementing_unit == "BAC Office" %}selected{% endif %}>BAC Office</option>
-                          <option value="Engineering Office" {% if entry.implementing_unit == "Engineering Office" %}selected{% endif %}>Engineering Office</option>
-                          <option value="PESO Office" {% if entry.implementing_unit == "PESO Office" %}selected{% endif %}>PESO Office</option>
-                          <option value="MDRRMO" {% if entry.implementing_unit == "MDRRMO" %}selected{% endif %}>MDRRMO</option>
-                          <option value="Sanguniang Barangay Office" {% if entry.implementing_unit == "Sanguniang Barangay Office" %}selected{% endif %}>Sanguniang Barangay Office</option>
-                          <option value="MPDC" {% if entry.implementing_unit == "MPDC" %}selected{% endif %}>MPDC</option>
-                          <option value="MCR Office" {% if entry.implementing_unit == "MCR Office" %}selected{% endif %}>MCR Office</option>
-                          <option value="MBO Office" {% if entry.implementing_unit == "MBO Office" %}selected{% endif %}>MBO Office</option>
-                          <option value="Accountant Office" {% if entry.implementing_unit == "Accountant Office" %}selected{% endif %}>Accountant Office</option>
-                          <option value="Assessor's Office" {% if entry.implementing_unit == "Assessor's Office" %}selected{% endif %}>Assessor's Office</option>
-                          <option value="MHO Office" {% if entry.implementing_unit == "MHO Office" %}selected{% endif %}>MHO Office</option>
-                          <option value="Parks & Plaza" {% if entry.implementing_unit == "Parks & Plaza" %}selected{% endif %}>Parks & Plaza</option>
-                          <option value="MSWD Office" {% if entry.implementing_unit == "MSWD Office" %}selected{% endif %}>MSWD Office</option>
-                          <option value="MENRO Office" {% if entry.implementing_unit == "MENRO Office" %}selected{% endif %}>MENRO Office</option>
-                          <option value="MO" {% if entry.implementing_unit == "MO" %}selected{% endif %}>MO</option>
-                          <option value="Streets & Bridges" {% if entry.implementing_unit == "Streets & Bridges" %}selected{% endif %}>Streets & Bridges</option>
-                          <option value="LDF" {% if entry.implementing_unit == "LDF" %}selected{% endif %}>LDF</option>
-                          <option value="Waterworks" {% if entry.implementing_unit == "Waterworks" %}selected{% endif %}>Waterworks</option>
-                          <option value="Markets" {% if entry.implementing_unit == "Markets" %}selected{% endif %}>Markets</option>
-                          <option value="Zero Waste" {% if entry.implementing_unit == "Zero Waste" %}selected{% endif %}>Zero Waste</option>
-                      </select>
-                  </div>
-              </div>
-              <div class="user-input-box mb-4">
-                  <label for="location_{{ entry.code }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
-                  <input type="text" id="location_{{ entry.code }}" name="location" class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" value="{{ entry.location }}">
-              </div>
-              <div class="user-input-box mb-4">
-                  <label for="remarks_{{ entry.code }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Remarks</label>
-                  <select id="remarks_{{ entry.code }}" name="remarks" class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                      <option value="" disabled selected>{{ entry.remarks }}</option>
-                      <option value="No PPMP/APP/POW" {% if entry.remarks == "No PPMP/APP/POW" %}selected{% endif %}>No PPMP/APP/POW</option>
-                      <option value="Awarded Already" {% if entry.remarks == "Awarded Already" %}selected{% endif %}>Awarded Already</option>
-                      <option value="Finished Already" {% if entry.remarks == "Finished Already" %}selected{% endif %}>Finished Already</option>
-                  </select>
-              </div>
-              <div class="user-input-box mb-4">
-                  <label for="start_date_{{ entry.code }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
-                  <input type="date" id="start_date_{{ entry.code }}" name="start_date" class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" value="{{ entry.start_date }}">
-              </div>
-              <div class="user-input-box mb-4">
-                  <label for="end_date_{{ entry.code }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
-                  <input type="date" id="end_date_{{ entry.code }}" name="end_date" class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" value="{{ entry.end_date }}">
-              </div>
-              <div class="user-input-box mb-4">
-                  <label for="code_{{ entry.code }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Code</label>
-                  <input type="text" id="code_{{ entry.code }}" name="code" class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" value="{{ entry.code }}">
-              </div>
-              <div class="user-input-box mb-4">
-                  <label for="services_{{ entry.code }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Services</label>
-                  <select id="services_{{ entry.code }}" name="services" class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                      <option value="" disabled selected>{{ entry.services }}</option>
-                      <option value="General" {% if entry.services == "General" %}selected{% endif %}>General</option>
-                      <option value="Social" {% if entry.services == "Social" %}selected{% endif %}>Social</option>
-                      <option value="Economic" {% if entry.services == "Economic" %}selected{% endif %}>Economic</option>
-                      <option value="Environmental" {% if entry.services == "Environmental" %}selected{% endif %}>Environmental</option>
-                  </select>
-              </div>
-              <div class="user-input-box mb-4">
-                  <label for="year_{{ entry.code }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Year</label>
-                  <input type="number" id="year_{{ entry.code }}" name="year" class="user-input block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" value="{{ entry.year }}">
-              </div>
-          </div>
-          <div class="flex flex-col space-y-4 justify-end"> <!-- Changed to flex-col for vertical stacking -->
-              <button type="submit" class="w-full px-4 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 focus:outline-none">
-                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Update
-              </button>
-              <a href="{% url 'continuing_projects' %}" class="btn-cancel bg-gray-100 text-gray-700 px-4 py-2 rounded-md shadow hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 flex items-center justify-center">
-                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                  </svg>
-                  Exit
-              </a>
-          </div>
-      </form>
-      {% endfor %}
-  </div>
-    <script>
+                </form>
+            {% endfor %}
+        </div>
+        <script>
       function showDetails(code, event) {
         event.preventDefault();
         
@@ -773,11 +921,10 @@
       document.getElementById('details').addEventListener('click', function(event) {
           event.stopPropagation(); // Prevent click events from bubbling up
       });
-    </script>
-
-{% if messages %}
-    {% for message in messages %}
-        <script type="text/javascript">
+        </script>
+        {% if messages %}
+            {% for message in messages %}
+                <script type="text/javascript">
             document.addEventListener('DOMContentLoaded', function() {
                 // Create an array to hold messages
                 var messages = [];
@@ -807,13 +954,12 @@
                     }
                 });
             });
-        </script>
-    {% endfor %}
-{% endif %}
-
-<script src="https://unpkg.com/hyperui@1.0.0/dist/js/hyperui.min.js" defer></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
+                </script>
+            {% endfor %}
+        {% endif %}
+        <script src="https://unpkg.com/hyperui@1.0.0/dist/js/hyperui.min.js" defer></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
   $(document).ready(function() {
       const originalTableContent = $('table tbody').html(); // Store original content
       
@@ -838,7 +984,7 @@
                       response.results.forEach(entry => {
                           tbody.append(`
                               <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                                  <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white" onclick="showDetails('${entry.code}', event)">
+                                  <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white" onclick="showDetails('${entry.code}', event)">
                                       ${entry.ppa}
                                   </th>
                                   <td class="px-6 py-4" onclick="showDetails('${entry.code}', event)">
@@ -846,18 +992,12 @@
                                   </td>
                                   <td class="px-6 py-4 flex items-center gap-2" onclick="showDetails('${entry.code}', event)">
                                       <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
                                       </svg>
                                       ${entry.code}
                                   </td>
                                   <td class="px-6 py-4" onclick="showDetails('${entry.code}', event)">
-                                      <span class="px-2.5 py-1 text-xs font-medium rounded-full ${
-                                          entry.remarks === 'Awarded Already' 
-                                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                              : entry.remarks === 'Finished Already'
-                                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-                                              : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                                      }">
+                                      <span class="px-2.5 py-1 text-xs font-medium rounded-full ${ entry.remarks === 'Awarded Already' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : entry.remarks === 'Finished Already' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' }">
                                           ${entry.remarks}
                                       </span>
                                   </td>
@@ -866,13 +1006,13 @@
                                           ${entry.is_awarded ? `
                                               <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2 mb-2" onclick="showAddObligationForm('${entry.code}')">
                                                                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                                   </svg>
                                                                   Obligation
                                                               </a>
                                                               <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2" onclick="showAddBudget('${entry.code}')">
                                                                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                                   </svg>
                                                                   Budget
                                                               </a>
@@ -881,13 +1021,13 @@
                                                       <td class="px-6 py-4">
                                                           <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline flex items-center gap-2 mb-2" onclick="showUpdateForm('${entry.code}')">
                                                               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                               </svg>
                                                               Update
                                                           </a>
                                                           <a href="#" class="font-medium text-red-600 dark:text-red-500 hover:underline flex items-center gap-2" onclick="showDeleteForm('${entry.code}')">
                                                               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                               </svg>
                                                               Delete
                                                           </a>
@@ -907,9 +1047,8 @@
           });
       });
   });
-</script>
-
-<script type="text/javascript">
+        </script>
+        <script type="text/javascript">
   function showLoader() {
     // Show SweetAlert loader when form is submitted
     Swal.fire({
@@ -926,9 +1065,8 @@
       }
     });
   }
-</script>
-
-<script>
+        </script>
+        <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Get the form element
     var form = document.getElementById('add-budget-form');
@@ -954,9 +1092,8 @@
       });
     });
   });
-</script>
-
-<script>
+        </script>
+        <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Get the form element
     var form = document.getElementById('add-obligation-form');
@@ -982,9 +1119,8 @@
       });
     });
   });
-</script>
-
-<script>
+        </script>
+        <script>
 document.addEventListener('DOMContentLoaded', function() {
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
@@ -1020,8 +1156,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-</script>
-<style>
+        </script>
+        <style>
 .overlay {
     display: none;
     position: fixed;
@@ -1144,9 +1280,8 @@ th, td {
 .pointer-events-none {
     pointer-events: none; /* Prevents any mouse events */
 }
-</style>
-
-<script>
+        </style>
+        <script>
 function showAddObligationForm(code) {
     Swal.fire({
         title: 'Add Project Obligation',
@@ -1410,7 +1545,6 @@ function showDeleteForm(code) {
         }
     });
 }
-</script>
-
-  </body>
+        </script>
+    </body>
 </html>
