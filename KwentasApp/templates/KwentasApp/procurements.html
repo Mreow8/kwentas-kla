@@ -142,7 +142,8 @@
                                                 class="px-6 py-3 text-left font-semibold text-gray-700 sm:w-[350px] md:w-[450px] lg:w-[550px]">
                                                 Remarks
                                             </th>
-                                            {% if request.user.is_superuser or request.user.department == 'BAC Office' %}
+                                          
+                                            {% if request.user.is_superuser%}
                                                 <!-- Action column -->
                                                 <th scope="col" class="px-6 py-3 text-left font-semibold text-gray-700">Action</th>
                                             {% endif %}
@@ -159,7 +160,7 @@
                                                     <td class="px-6 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.total_budget }}</td>
                                                     <td class="px-6 py-4 sm:w-[300px] md:w-[400px] lg:w-[500px]">{{ entry.code }}</td>
                                                     <td class="px-6 py-4 sm:w-[350px] md:w-[450px] lg:w-[550px]">{{ entry.remarks }}</td>
-                                                    {% if request.user.is_superuser or request.user.department == 'BAC Office' %}
+                                                    {% if request.user.is_superuser %}
                                                         <td class="px-6 py-4">
                                                             <p class="text-blue-500 hover:text-blue-700 cursor-pointer"
                                                                onclick="event.stopPropagation(); showUpdateForm('{{ entry.code }}')">
@@ -178,7 +179,7 @@
                                                         <td class="px-8 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.implementing_unit }}</td>
                                                         <td class="px-8 py-4 sm:w-[300px] md:w-[400px] lg:w-[500px]">{{ entry.code }}</td>
                                                         <td class="px-8 py-4 sm:w-[350px] md:w-[450px] lg:w-[550px]">{{ entry.remarks }}</td>
-                                                        {% if request.user.is_superuser or request.user.department == 'BAC Office' %}
+                                                        {% if request.user.is_superuser  %}
                                                             <td class="px-8 py-4">
                                                                 <p class="text-blue-500 hover:text-blue-700 cursor-pointer"
                                                                    onclick="event.stopPropagation(); showUpdateForm('{{ entry.code }}')">
@@ -773,7 +774,7 @@ fetch(`/procurements/delete/${fileId}/`, {
                                   <td class="implementing-unit" onclick="showDetails('${entry.code}')">${entry.implementing_unit}</td>
                                   <td class="code" onclick="showDetails('${entry.code}')">${entry.code}</td>
                                   <td class="year" onclick="showDetails('${entry.code}')">${entry.remarks}</td>
-                  {% if request.user.is_superuser or request.user.department == 'BAC Office' %}
+                  {% if request.user.is_superuser  %}
                      
                       <td>
                             <p class="status update" onclick="showUpdateForm('${entry.code}')">Update</p><br>

@@ -38,6 +38,7 @@ ALLOWED_HOSTS = ['kwentas-klaras-boljoon.onrender.com','kwentas-kla.onrender.com
 # Application definition
 
 INSTALLED_APPS = [
+      'django_extensions',
     'unfold',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -204,8 +205,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'kwentasklarasboljoon@gmail.com'
-EMAIL_HOST_PASSWORD = 'hvab euhu zpvu syvg'
+EMAIL_HOST_USER = 'boljoonkwentasklaras@gmail.com'
+EMAIL_HOST_PASSWORD = 'vixw bcjt gnjt xuhj'
 
 # Enable all events for auditing
 DJANGO_EASY_AUDIT_WATCH_LOGIN_EVENTS = True  # For login/logout events

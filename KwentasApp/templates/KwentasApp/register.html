@@ -1,182 +1,251 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <link rel="shortcut icon"
-              type="x-icon"
-              href="{% static 'KwentasApp/img/logobrowser.jpg' %}" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Kwentas Klaras Admin Registration</title>
-        <link rel="stylesheet"
-              type="text/css"
-              href="{% static 'KwentasApp/css/register.css' %}" />
-        <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap"
-              rel="stylesheet" />
-        <script src="https://kit.fontawesome.com/a81368914c.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <link rel="stylesheet"
-              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    </head>
-    <body>
-        <div class="container">
-            <div class="img">
-                <img src="{% static 'KwentasApp/img/logo.png' %}" />
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="shortcut icon"
+      type="x-icon"
+      href="{% static 'KwentasApp/img/logobrowser.jpg' %}"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kwentas Klaras Admin Registration</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'KwentasApp/css/register.css' %}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://kit.fontawesome.com/a81368914c.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="img">
+        <img src="{% static 'KwentasApp/img/logo.png' %}" />
+      </div>
+      <div class="login-content">
+        <form id="dataForm" action="{% url 'register' %}" method="post">
+          {% csrf_token %}
+          <h2 class="title">Registration</h2>
+          <div class="input-div">
+            <div class="i">
+              <i class="fas fa-user"></i>
             </div>
-            <div class="login-content">
-                <form id="dataForm" action="{% url 'register' %}" method="post">
-                    {% csrf_token %}
-                    <h2 class="title">Registration</h2>
-                    <div class="input-div">
-                        <div class="i">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="div">
-                            <h5>Account Username</h5>
-                            <input type="text" name="username" class="input" required />
-                            <h6 id="usernameNote"
-                                style="display: none;
-                                       margin-top: 55px;
-                                       text-align: left;
-                                       white-space: nowrap;
-                                       color: #cc0000">Note: Dont use username as your password.</h6>
-                        </div>
-                    </div>
-                    <div class="input-div">
-                        <div class="i">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="div">
-                            <h5>Name</h5>
-                            <input type="text" name="name" class="input" required />
-                        </div>
-                    </div>
-                    <div class="input-div">
-                        <div class="i">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <div class="div">
-                            <h5>Employee Email</h5>
-                            <input type="email" name="email" class="input" required />
-                        </div>
-                    </div>
-                    <div class="input-div">
-                        <div class="i">
-                            <i class="fas fa-building"></i>
-                        </div>
-                        <div class="drop">
-                            <input type="text"
-                                   name="department"
-                                   placeholder="Department"
-                                   onclick="toggleDropdown()"
-                                   id="departmentInput"
-                                   readonly
-                                   required />
-                            <i class="fas fa-chevron-down"
-                               id="dropdownArrow"
-                               onclick="toggleDropdown()"></i>
-                            <ul class="content" id="departmentOptions">
-                                <li onclick="selectOption('Mayor\'s Office')">Mayor's Office</li>
-                                <li onclick="selectOption('Tourism Office')">Tourism Office</li>
-                                <li onclick="selectOption('PESO Office')">PESO Office</li>
-                                <li onclick="selectOption('MDRRMO')">MDDRMO</li>
-                                <li onclick="selectOption('Sanguniang Baranggay Office')">Sanguniang Barangay Office</li>
-                                <li onclick="selectOption('MPDC Office')">MPDC</li>
-                                <li onclick="selectOption('MCR Office')">MCR Office</li>
-                                <li onclick="selectOption('MBO Office')">MBO Office</li>
-                                <li onclick="selectOption('Accountant Office')">Accountant Office</li>
-                                <li onclick="selectOption('Assessor Office')">Assessor's Office</li>
-                                <li onclick="selectOption('MHO Office')">MHO Office</li>
-                                <li onclick="selectOption('Parks & Plaza')">Parks & Plaza</li>
-                                <li onclick="selectOption('MSWD Office')">MSWD Office</li>
-                                <li onclick="selectOption('MENRO Office')">MENRO Office</li>
-                                <li onclick="selectOption('MO')">MO</li>
-                                <li onclick="selectOption('Streets & Bridges')">Streets & Bridges</li>
-                                <li onclick="selectOption('LDF')">LDF</li>
-                                <li onclick="selectOption('Waterworks')">Waterworks</li>
-                                <li onclick="selectOption('Markets')">Markets</li>
-                                <li onclick="selectOption('Zero Waste')">Zero Waste</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="input-div">
-                        <div class="i clickable show-password" id="show-password-1">
-                            <i class="fas fa-lock"></i>
-                        </div>
-                        <div class="div">
-                            <h5>Password</h5>
-                            <input type="password"
-                                   class="input password-input"
-                                   id="password-input"
-                                   name="password1"
-                                   required />
-                            <h6 id="capsLockNote"
-                                style="display: none;
-                                       margin-top: 55px;
-                                       white-space: nowrap;
-                                       text-align: left;
-                                       color: #cc0000">Caps Lock is ON</h6>
-                            <h6 id="passwordRuleNote"
-                                style="margin-top: 55px;
-                                       white-space: nowrap;
-                                       text-align: left;
-                                       color: #cc0000">Note: Password should not contain the username or email</h6>
-                        </div>
-                    </div>
-                    <div class="input-div">
-                        <div class="i clickable show-password" id="show-password-2">
-                            <i class="fas fa-lock"></i>
-                        </div>
-                        <div class="div">
-                            <h5>Enter password again</h5>
-                            <input type="password"
-                                   class="input password-input"
-                                   id="password-input-2"
-                                   name="password2"
-                                   required />
-                            <h6 id="capsLockNote2"
-                                style="display: none;
-                                       margin-top: 55px;
-                                       white-space: nowrap;
-                                       text-align: left;
-                                       color: #cc0000">Caps Lock is ON</h6>
-                            <h6 id="passwordMatchNote"
-                                style="display: none;
-                                       margin-top: 55px;
-                                       white-space: nowrap;
-                                       text-align: left;
-                                       color: green">Passwords match!</h6>
-                            <h6 id="passwordMismatchNote"
-                                style="display: none;
-                                       margin-top: 55px;
-                                       white-space: nowrap;
-                                       text-align: left;
-                                       color: #cc0000">Passwords do not match</h6>
-                        </div>
-                    </div>
-                    <div class="input-div">
-                        <div class="i">
-                            <i class="fas fa-key"></i>
-                        </div>
-                        <div class="div">
-                            <h5>OTP Code</h5>
-                            {% csrf_token %}
-                            <input type="text"
-                                   name="verification_code"
-                                   id="verificationCode"
-                                   class="input"
-                                   required />
-                            <button type="button"
-                                    class="trigger-button"
-                                    onclick="requestVerificationCode()">Send Code</button>
-                        </div>
-                    </div>
-                    <input type="submit" class="btn" value="Submit" />
-                    <a href="#" id="cancelButton" class="btn-cancel">Cancel</a>
-                </form>
+            <div class="div">
+              <h5>Account Username</h5>
+              <input type="text" name="username" class="input" required />
+              <h6
+                id="usernameNote"
+                style="
+                  display: none;
+                  margin-top: 55px;
+                  text-align: left;
+                  white-space: nowrap;
+                  color: #cc0000;
+                "
+              >
+                Note: Dont use username as your password.
+              </h6>
             </div>
-        </div>
-        <script>
+          </div>
+          <div class="input-div">
+            <div class="i">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="div">
+              <h5>Name</h5>
+              <input type="text" name="name" class="input" required />
+            </div>
+          </div>
+          <div class="input-div">
+            <div class="i">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <div class="div">
+              <h5>Employee Email</h5>
+              <input type="email" name="email" class="input" required />
+            </div>
+          </div>
+          <div class="input-div">
+            <div class="i">
+              <i class="fas fa-building"></i>
+            </div>
+            <div class="drop">
+              <input
+                type="text"
+                name="department"
+                placeholder="Department"
+                onclick="toggleDropdown()"
+                id="departmentInput"
+                readonly
+                required
+              />
+              <i
+                class="fas fa-chevron-down"
+                id="dropdownArrow"
+                onclick="toggleDropdown()"
+              ></i>
+              <ul class="content" id="departmentOptions">
+                <li onclick="selectOption('Mayor\'s Office')">
+                  Mayor's Office
+                </li>
+                <li onclick="selectOption('Tourism Office')">Tourism Office</li>
+                <li onclick="selectOption('PESO Office')">PESO Office</li>
+                <li onclick="selectOption('MDRRMO')">MDDRMO</li>
+                <li onclick="selectOption('Sanguniang Baranggay Office')">
+                  Sanguniang Barangay Office
+                </li>
+                <li onclick="selectOption('MPDC Office')">MPDC</li>
+                <li onclick="selectOption('MCR Office')">MCR Office</li>
+                <li onclick="selectOption('MBO Office')">MBO Office</li>
+                <li onclick="selectOption('Accountant Office')">
+                  Accountant Office
+                </li>
+                <li onclick="selectOption('Assessor Office')">
+                  Assessor's Office
+                </li>
+                <li onclick="selectOption('MHO Office')">MHO Office</li>
+                <li onclick="selectOption('Parks & Plaza')">Parks & Plaza</li>
+                <li onclick="selectOption('MSWD Office')">MSWD Office</li>
+                <li onclick="selectOption('MENRO Office')">MENRO Office</li>
+                <li onclick="selectOption('MO')">MO</li>
+                <li onclick="selectOption('Streets & Bridges')">
+                  Streets & Bridges
+                </li>
+                <li onclick="selectOption('LDF')">LDF</li>
+                <li onclick="selectOption('Waterworks')">Waterworks</li>
+                <li onclick="selectOption('Markets')">Markets</li>
+                <li onclick="selectOption('Zero Waste')">Zero Waste</li>
+              </ul>
+            </div>
+          </div>
+          <div class="input-div">
+            <div class="i clickable show-password" id="show-password-1">
+              <i class="fas fa-lock"></i>
+            </div>
+            <div class="div">
+              <h5>Password</h5>
+              <input
+                type="password"
+                class="input password-input"
+                id="password-input"
+                name="password1"
+                required
+              />
+              <h6
+                id="capsLockNote"
+                style="
+                  display: none;
+                  margin-top: 55px;
+                  white-space: nowrap;
+                  text-align: left;
+                  color: #cc0000;
+                "
+              >
+                Caps Lock is ON
+              </h6>
+              <h6
+                id="passwordRuleNote"
+                style="
+                  margin-top: 55px;
+                  white-space: nowrap;
+                  text-align: left;
+                  color: #cc0000;
+                "
+              >
+                Note: Password should not contain the username or email
+              </h6>
+            </div>
+          </div>
+          <div class="input-div">
+            <div class="i clickable show-password" id="show-password-2">
+              <i class="fas fa-lock"></i>
+            </div>
+            <div class="div">
+              <h5>Enter password again</h5>
+              <input
+                type="password"
+                class="input password-input"
+                id="password-input-2"
+                name="password2"
+                required
+              />
+              <h6
+                id="capsLockNote2"
+                style="
+                  display: none;
+                  margin-top: 55px;
+                  white-space: nowrap;
+                  text-align: left;
+                  color: #cc0000;
+                "
+              >
+                Caps Lock is ON
+              </h6>
+              <h6
+                id="passwordMatchNote"
+                style="
+                  display: none;
+                  margin-top: 55px;
+                  white-space: nowrap;
+                  text-align: left;
+                  color: green;
+                "
+              >
+                Passwords match!
+              </h6>
+              <h6
+                id="passwordMismatchNote"
+                style="
+                  display: none;
+                  margin-top: 55px;
+                  white-space: nowrap;
+                  text-align: left;
+                  color: #cc0000;
+                "
+              >
+                Passwords do not match
+              </h6>
+            </div>
+          </div>
+          <div class="input-div">
+            <div class="i">
+              <i class="fas fa-key"></i>
+            </div>
+            <div class="div">
+              <h5>OTP Code</h5>
+              {% csrf_token %}
+              <input
+                type="text"
+                name="verification_code"
+                id="verificationCode"
+                class="input"
+                required
+              />
+              <button
+                type="button"
+                class="trigger-button"
+                onclick="requestVerificationCode()"
+              >
+                Send Code
+              </button>
+            </div>
+          </div>
+          <input type="submit" class="btn" value="Submit" />
+          <a href="#" id="cancelButton" class="btn-cancel">Cancel</a>
+        </form>
+      </div>
+    </div>
+    <script>
+      document.cookie = "csrftoken={{ csrf_token }}";
       function requestVerificationCode() {
         const email = document.querySelector('input[name="email"]').value; // Get email from the input field
 
@@ -262,8 +331,8 @@
         }
         return cookieValue;
       }
-        </script>
-        <script>
+    </script>
+    <script>
       document
         .getElementById("dataForm")
         .addEventListener("submit", function (event) {
@@ -375,8 +444,8 @@
           }
         });
       });
-        </script>
-        <script>
+    </script>
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         const passwordInput = document.getElementById("password-input");
         const capsLockNote = document.getElementById("capsLockNote");
@@ -414,8 +483,8 @@
           passwordRuleNote.style.display = "none";
         });
       });
-        </script>
-        <script>
+    </script>
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         const passwordInput1 = document.getElementById("password-input");
         const capsLockNote1 = document.getElementById("capsLockNote");
@@ -458,8 +527,8 @@
           checkCapsLock2(event);
         });
       });
-        </script>
-        <script>
+    </script>
+    <script>
       const passwordInput1 = document.getElementById("password-input");
       const passwordInput2 = document.getElementById("password-input-2");
       const passwordMatchNote = document.getElementById("passwordMatchNote");
@@ -481,6 +550,6 @@
           passwordMismatchNote.style.display = "block"; // Show mismatch message
         }
       });
-        </script>
-    </body>
+    </script>
+  </body>
 </html>

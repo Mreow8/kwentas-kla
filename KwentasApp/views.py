@@ -294,11 +294,10 @@ def send_reset_code(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            email = data.get('email')
-
-
-            if not CustomUser.objects.filter(email=email).exists():
+            email = data.get('email', '').strip().lower()
+            if not CustomUser.objects.filter(email__iexact=email).exists():
                 return JsonResponse({'success': False, 'error': 'Email not found!'}, status=404)
+
 
             # ✅ Generate a 6-digit reset code
             code = ''.join(random.choices('0123456789', k=6))
@@ -323,7 +322,10 @@ def send_reset_code(request):
                 return JsonResponse({'success': True})
             except Exception as e:
                 logger.error(f'Error sending email to {email}: {str(e)}')
+                print(f"Error sending email: {e}")
+
                 return JsonResponse({'success': False, 'error': 'Error sending email.'}, status=500)
+            
 
         except json.JSONDecodeError:
             logger.warning('Invalid JSON format received in send_verification_code.')
@@ -355,7 +357,7 @@ def send_verification_code(request):
                 return JsonResponse({'success': False, 'error': 'Error rendering email template.'}, status=500)
 
             try:
-                msg = EmailMultiAlternatives(subject, text_content, 'kwentasklarasboljoon@gmail.com', [email])
+                msg = EmailMultiAlternatives(subject, text_content, 'boljoonkwentasklaras@gmail.com', [email])
                 msg.attach_alternative(html_content, "text/html")
                 msg.send()
 
@@ -365,8 +367,10 @@ def send_verification_code(request):
                 logger.info(f'Sent verification code to {email}')
                 return JsonResponse({'success': True})
             except Exception as e:
+                print(f"Error sending email: {e}")  # <-- Add this line
                 logger.error(f'Error sending email to {email}: {str(e)}')
                 return JsonResponse({'success': False, 'error': 'Error sending email.'}, status=500)
+
 
         except json.JSONDecodeError:
             logger.warning('Invalid JSON format received in send_verification_code.')
