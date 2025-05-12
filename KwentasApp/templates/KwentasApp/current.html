@@ -1352,41 +1352,7 @@
   });
         </script>
         <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
-    const overlay = document.getElementById('overlay');
 
-    function toggleSidebar() {
-        sidebar.classList.toggle('-translate-x-full');
-        if (!sidebar.classList.contains('-translate-x-full')) {
-            overlay.style.display = 'block';
-        } else {
-            overlay.style.display = 'none';
-        }
-    }
-
-    sidebarToggle.addEventListener('click', toggleSidebar);
-    mobileSidebarToggle.addEventListener('click', toggleSidebar);
-
-    // Close sidebar when clicking overlay
-    overlay.addEventListener('click', function() {
-        if (!sidebar.classList.contains('-translate-x-full')) {
-            toggleSidebar();
-        }
-    });
-
-    // Close sidebar when screen is resized to larger size
-    window.addEventListener('resize', function() {
-        if (window.innerWidth >= 768) { // md breakpoint
-            sidebar.classList.remove('-translate-x-full');
-            overlay.style.display = 'none';
-        } else {
-            sidebar.classList.add('-translate-x-full');
-        }
-    });
-});
         </script>
         <style>
 .overlay {

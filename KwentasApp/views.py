@@ -70,7 +70,9 @@ FILE_TYPE_KEYWORDS = {
     "APP": ["APP", "ANNUAL PROCUREMENT PLAN"],
     "POW": ["POW", "PROGRAM OF WORKS"]  
 }
-# views.py@csrf_exempt
+# views.py
+
+@csrf_exempt
 def upload_excel(request):
     if request.method != 'POST':
         messages.error(request, "Invalid request method.")
@@ -119,37 +121,29 @@ def upload_excel(request):
                 break
 
         if found:
-            # Save file record
+    # Save file record
             UploadedFileData.objects.create(
-                project_code=project_code,
-                file_type=selected_type,
-                file=uploaded_file,
-                file_name=uploaded_file.name,
+            project_code = project_code,
+            file_type    = selected_type,
+            file         = uploaded_file,
+            file_name    = uploaded_file.name,
             )
 
-            # Update Entry remarks if matching project_code exists
+    # ✅ Update Entry remarks if matching project_code exists
             try:
                 entry = Entry.objects.get(code=project_code)
-                print(f"\nEntry found for project code: {project_code}. Current remarks: {entry.remarks}")
-
-                # Update remarks to "Document Submitted" if empty or "No PPMP/APP/POW"
-                if entry.remarks in ["", "No PPMP/APP/POW"]:
-                    print(f"Updating remarks for project code {project_code} to 'Document Submitted'")
-                    entry.remarks = "Document Submitted"
-                    entry.save()
-                    print(f"Remarks updated to: {entry.remarks}")
-                else:
-                    print(f"No update needed for project code: {project_code} (remarks: {entry.remarks})")
-
+                entry.remarks = "Awarded Already"
+                print(f"\nUpdating entry for project code: {project_code}")
+                entry.save()
             except Entry.DoesNotExist:
                 print(f"\nNo matching entry found for project code: {project_code}")
                 messages.warning(request, f"No matching entry found for project code: {project_code}")
 
             msgs = ", ".join(found_keywords)
             messages.success(
-                request,
-                f"Excel file '{uploaded_file.name}' uploaded successfully for project {project_code}. Found keyword(s) [{msgs}] for {selected_type}. Remarks updated to 'Document Submitted'."
-            )
+        request,
+        f"Found keyword(s) [{msgs}] for {selected_type} — saved under project {project_code}. Remarks updated."
+    )
         else:
             messages.error(
                 request,
@@ -160,7 +154,6 @@ def upload_excel(request):
         messages.error(request, f"Error reading Excel file: {e}")
 
     return redirect('procurements')
-
 def bulk_download_xlsx(request):
     if request.method == 'POST':
         selected_codes = request.POST.getlist('selected_entries')

@@ -16,6 +16,11 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+                <link rel="stylesheet"
+              href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+               {% tailwind_css %}
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         <link rel="stylesheet"
               type="text/css"
               href="{% static 'KwentasApp/css/continuing.css' %}">
@@ -688,42 +693,6 @@
       });
   });
             </script>
-            <script>
-  document.addEventListener('DOMContentLoaded', function() {
-      const sidebar = document.getElementById('sidebar');
-      const sidebarToggle = document.getElementById('sidebarToggle');
-      const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
-      const overlay = document.getElementById('overlay');
-  
-      function toggleSidebar() {
-          sidebar.classList.toggle('-translate-x-full');
-          if (!sidebar.classList.contains('-translate-x-full')) {
-              overlay.style.display = 'block';
-          } else {
-              overlay.style.display = 'none';
-          }
-      }
-  
-      sidebarToggle.addEventListener('click', toggleSidebar);
-      mobileSidebarToggle.addEventListener('click', toggleSidebar);
-  
-      // Close sidebar when clicking overlay
-      overlay.addEventListener('click', function() {
-          if (!sidebar.classList.contains('-translate-x-full')) {
-              toggleSidebar();
-          }
-      });
-  
-      // Close sidebar when screen is resized to larger size
-      window.addEventListener('resize', function() {
-          if (window.innerWidth >= 768) { // md breakpoint
-              sidebar.classList.remove('-translate-x-full');
-              overlay.style.display = 'none';
-          } else {
-              sidebar.classList.add('-translate-x-full');
-          }
-      });
-  });
-            </script>
+     
         </body>
     </html>

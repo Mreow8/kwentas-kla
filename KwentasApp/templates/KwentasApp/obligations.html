@@ -215,77 +215,61 @@
                         </nav>
                     </main>
                     <!-- DETAILS  -->
-                    <div class="details"
-                         id="details"
-                         style="margin: 0 auto;
-                                text-align: center">
-                        <div class="flex  items-center">
-                            <a href="{% url 'obligations' %}"
-                               class="text-gray-600 hover:text-gray-900">
-                                <i class="material-icons">close</i>
-                            </a>
-                            <a href="{% url 'obligations' %}">
-                                <h1 class="text-2xl font-bold">PROJECT DETAILS</h1>
-                            </a>
-                        </div>
-                        <ul class="mt-4 space-y-4">
-                            {% for entry in all_entries %}
-                                <li id="details-{{ entry.code }}"
-                                    class="entry-item hidden border rounded-lg p-4 shadow-sm">
-                                    <div class="mb-4">
-                                        <div class="grid grid-cols-2 gap-4">
+                    <div id="details"
+                         class="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 overflow-y-auto p-6">
+                        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+                            <div class="flex justify-between items-center mb-6">
+                                <h1 class="text-3xl font-bold">PROJECT DETAILS</h1>
+                                <a href="{% url 'obligations' %}">
+                                    <i class="material-icons text-3xl text-gray-600 hover:text-red-500 cursor-pointer">close</i>
+                                </a>
+                            </div>
+                            <ul>
+                                {% for entry in all_entries %}
+                                    <li id="details-{{ entry.code }}" class="hidden">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700">Remaining Obligation</label>
-                                                <p class="mt-1 text-lg text-gray-900">₱{{ entry.remaining_obligations|intcomma }}</p>
+                                                <label class="text-gray-600 text-lg">Remaining Obligation</label>
+                                                <p class="text-xl font-semibold text-gray-800">₱{{ entry.remaining_obligations|intcomma }}</p>
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700">Total Obligation</label>
-                                                <p class="mt-1 text-lg text-gray-900">₱{{ entry.total_obligations|intcomma }}</p>
+                                                <label class="text-gray-600 text-lg">Total Obligation</label>
+                                                <p class="text-xl font-semibold text-gray-800">₱{{ entry.total_obligations|intcomma }}</p>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div>
-                                        <span class="block text-lg font-semibold text-gray-800 mb-2">Added Obligation</span>
-                                        <div class="overflow-x-auto">
-                                            <table class="min-w-full divide-y divide-gray-200">
-                                                <thead class="bg-gray-50">
-                                                    <tr>
-                                                        <th scope="col"
-                                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                            Name
-                                                        </th>
-                                                        <th scope="col"
-                                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                            Amount
-                                                        </th>
-                                                        <th scope="col"
-                                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                            Date
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody class="bg-white divide-y divide-gray-200">
-                                                    {% for obligation in entry.obligation %}
+                                        <div class="bg-gray-100 rounded-lg shadow-inner p-6">
+                                            <h2 class="text-xl font-semibold mb-4">Added Obligation</h2>
+                                            <div class="overflow-x-auto">
+                                                <table class="min-w-full table-auto border border-gray-300 text-sm">
+                                                    <thead class="bg-gray-200">
                                                         <tr>
-                                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{{ obligation.name }}</td>
-                                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">₱{{ obligation.obligation|intcomma }}</td>
-                                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">{{ obligation.date }}</td>
+                                                            <th class="px-4 py-2 border border-gray-300 text-left">Name</th>
+                                                            <th class="px-4 py-2 border border-gray-300 text-left">Amount</th>
+                                                            <th class="px-4 py-2 border border-gray-300 text-left">Date</th>
                                                         </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for obligation in entry.obligation %}
+                                                            <tr class="hover:bg-gray-50">
+                                                                <td class="px-4 py-2 border border-gray-300">{{ obligation.name }}</td>
+                                                                <td class="px-4 py-2 border border-gray-300">₱{{ obligation.obligation|intcomma }}</td>
+                                                                <td class="px-4 py-2 border border-gray-300">{{ obligation.date }}</td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
-                </div>
-                <!------------------------------------------------------ JAVASCRIPT-------------------------------------------------->
-                <!-- PIE CHART JS -->
-                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                <!-- Details js -->
-                <script>
+                    <!------------------------------------------------------ JAVASCRIPT-------------------------------------------------->
+                    <!-- PIE CHART JS -->
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                    <!-- Details js -->
+                    <script>
       function showDetails(code) {
         document.getElementById('customers_table').style.filter = 'blur(10px)';
         document.getElementById('overlay').style.display = 'block';
@@ -296,9 +280,9 @@
         document.getElementById('details-' + code).style.display = 'block';
         document.getElementById('details').style.display = 'block';
       }
-                </script>
-            </body>
-            <script>
+                    </script>
+                </body>
+                <script>
     $(document).ready(function() {
         $('#search-input').on('input', function() {
             let query = $(this).val();
@@ -331,5 +315,5 @@
             });
         });
     });
-            </script>
-        </html>
+                </script>
+            </html>
