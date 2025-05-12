@@ -27,7 +27,7 @@
         {% tailwind_css %}
     </head>
     <body>
-        <div class="overlay" id="overlay"></div>
+          <div class="overlay" id="overlay"></div>
         <div class="flex h-screen">
             {% include 'KwentasApp/partials/aside.html' %}
             <main class="flex-1 transition-margin duration-300 ml-0 md:ml-64 min-h-screen bg-gray-100 dark:bg-gray-900{% if not request.user.is_superuser %} non-superuser{% endif %}"
@@ -94,7 +94,7 @@
                             <div class="relative col-span-1 md:col-span-2 w-full">
                                 <!-- Sort -->
                                 <form method="GET"
-                                      action="{% url 'search_projects' 'disbursements' %}"
+                                      action="{% url 'search_projects' 'check_payment' %}"
                                       class="w-full">
                                     <div class="relative">
                                         <input type="text"
@@ -123,7 +123,7 @@
                                         <th scope="col" class="px-6 py-3">Remaining Obligations</th>
                                         <th scope="col" class="px-6 py-3"scope="col" class="px-6 py-3">Total Obligations</th>
                                         {% if request.user.is_superuser or request.user.department == 'Accountant Office' %}
-                                            <thscope ="col" class="px-6 py-3">Add
+                                            <th scope ="col" class="px-6 py-3">Add
                                         </th>
                                     {% endif %}
                                 </tr>
@@ -241,6 +241,7 @@
                     </nav>
                 </div>
             </div>
+            </div></main>
             <!-- DETAILS  -->
             <div class="details" id="details">
                 <a href="{% url 'check_payment' %}">
@@ -563,6 +564,7 @@
 
     function showDisbursementForm(code) {
       // Blur the main table
+       console.log("Opening disbursement for:", code);
       document.getElementById('customers_table').style.filter = 'blur(10px)';
       // Display the overlay
       document.getElementById('overlay').style.display = 'block';
@@ -661,7 +663,7 @@
       $('#search-input').on('input', function() {
           let query = $(this).val();
           $.ajax({
-              url: "{% url 'search_projects' 'disbursements' %}",  // Adjust URL if needed
+              url: "{% url 'search_projects' 'check_payment' %}",  // Adjust URL if needed
               data: { query: query },
               headers: { 'X-Requested-With': 'XMLHttpRequest' }, // Mark it as AJAX
               success: function(response) {

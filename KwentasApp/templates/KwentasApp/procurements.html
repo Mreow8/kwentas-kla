@@ -1,459 +1,557 @@
-{% load humanize %}
-{% load static tailwind_tags %}
+{% load humanize %} {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-    {% csrf_token %}
-    <head>
-        <meta charset="UTF-8">
-        <link rel="shortcut icon"
-              type="x-icon"
-              href="{% static 'KwentasApp/img/logobrowser.jpg' %}">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Procurements</title>
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-              rel="stylesheet">
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
-              rel="stylesheet">
-        <script src="https://kit.fontawesome.com/a81368914c.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        {% tailwind_css %}
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-        <link rel="stylesheet"
-              type="text/css"
-              href="{% static 'KwentasApp/css/procurements.css' %}">
-    </head>
-    <body>
-        <div class="overlay" id="overlay"></div>
-        <div class="flex h-screen">
-            {% include 'KwentasApp/partials/aside.html' %}
-            <main class="flex-1 transition-margin duration-300 ml-0 md:ml-64 min-h-screen bg-gray-100 dark:bg-gray-900{% if not request.user.is_superuser %} non-superuser{% endif %}"
-                  id="customers_table">
-                <div class="p-2 sm:p-4 md:p-8 w-full max-w-[100vw] overflow-hidden">
-                    <!-- Mobile Header with Menu Button -->
-                    <div class="md:hidden mb-4 flex items-center">
-                        <button id="mobileSidebarToggle"
-                                class="p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button>
-                        <h1 class="ml-2 text-xl font-semibold">Current Projects</h1>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Grid container -->
-                        <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-800 dark:border-neutral-700 p-4">
-                            <!-- Adjusted padding -->
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">Continuing Projects</p>
-                                    <h2 class="text-xl font-medium text-gray-800 dark:text-neutral-200">
-                                        {% if matched_entries_2024_and_above %}
-                                            {{ matched_entries_2024_and_above|length }} Projects
-                                        {% elif page_obj %}
-                                            {{ page_obj|length }} Projects
-                                        {% else %}
-                                            0 Projects
-                                        {% endif %}
-                                        under 20% Local Development Fund
-                                    </h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-800 dark:border-neutral-700 p-4">
-                            <!-- Adjusted padding -->
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">Project Remarks</p>
-                                    <h2 class="text-xl font-medium text-gray-800 dark:text-neutral-200">{{ awarded_count }} Projects Awarded Already</h2>
-                                </div>
-                                <div class="hs-tooltip"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg mt-3 p-3 sm:p-4 md:p-6 flex flex-col justify-between min-h-[90vh] w-full">
-                        <div class="mb-4">
-                            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">Procurements</h1>
-                            <div class="flex items-center gap-4">
-                                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Manage and monitor ongoing project details</p>
-                            </div>
-                        </div>
-                        <div class="mb-4 sm:mb-6 grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-4">
-                            <!-- Sort -->
-                            <div class="relative w-full">
-                                <form method="GET" action="" class="w-full">
-                                    <select name="sort"
-                                            id="sort"
-                                            onchange="this.form.submit()"
-                                            class="w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                        <option value="" {% if not sort_option %}selected{% endif %}>Sort by</option>
-                                        <option value="recent" {% if sort_option == 'recent' %}selected{% endif %}>Recently Added</option>
-                                        <option value="oldest" {% if sort_option == 'oldest' %}selected{% endif %}>Oldest Added</option>
-                                    </select>
-                                </form>
-                            </div>
-                            <!-- Search -->
-                            <div class="relative col-span-1 md:col-span-2 w-full">
-                                <form method="GET"
-                                      action="{% url 'search_projects' 'continuing' %}"
-                                      class="w-full">
-                                    <div class="relative">
-                                        <input type="text"
-                                               id="search-input"
-                                               name="query"
-                                               class="w-full pl-10 pr-4 py-2.5 text-gray-700 bg-white border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-sm hover:border-gray-400 transition-colors duration-200"
-                                               placeholder="Search Continuing Projects...">
-                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400"
-                                                 fill="none"
-                                                 stroke="currentColor"
-                                                 viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </form>
-                                <div id="search-results"></div>
-                            </div>
-                        </div>
-                        <div class="mb-4 sm:mb-6 flex-grow overflow-hidden">
-                            <!-- Use flex to expand the width of the container and table -->
-                            <div class="relative flex w-full max-w-full lg:max-w-full overflow-x-auto"
-                                 style="min-height: 65vh">
-                                <!-- Table width set to take full available space -->
-                                <table class="min-w-full table-auto border-separate border-spacing-0 w-full">
-                                    <thead class="text-xs text-gray-700 uppercase bg-gray-50/50 dark:bg-gray-700/50 dark:text-gray-400">
-                                        <tr>
-                                            <!-- Increased width for PPA with responsive design -->
-                                            <th scope="col"
-                                                class="px-6 py-3 w-1/2 text-left font-semibold text-gray-700 sm:w-[600px] md:w-[700px] lg:w-[800px]">
-                                                PPA
-                                            </th>
-                                            <th scope="col"
-                                                class="px-6 py-3 w-auto text-left font-semibold text-gray-700 sm:w-[450px] md:w-[550px] lg:w-[650px]">
-                                                Implementing Unit
-                                            </th>
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left font-semibold text-gray-700 sm:w-[300px] md:w-[400px] lg:w-[500px]">
-                                                Code
-                                            </th>
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left font-semibold text-gray-700 sm:w-[350px] md:w-[450px] lg:w-[550px]">
-                                                Remarks
-                                            </th>
-                                          
-                                            {% if request.user.is_superuser%}
-                                                <!-- Action column -->
-                                                <th scope="col" class="px-6 py-3 text-left font-semibold text-gray-700">Action</th>
-                                            {% endif %}
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                        {% if matched_entries %}
-                                            {% for entry in matched_entries %}
-                                                <tr class="hover:bg-gray-100 cursor-pointer"
-                                                    onclick="showUploadedFiles('{{ entry.code }}', '{{ entry.code }}')">
-                                                    <td class="px-6 py-4 sm:w-[700px] md:w-[800px] lg:w-[1000px]">{{ entry.ppa }}</td>
-                                                    <td class="px-6 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.implementing_unit }}</td>
-                                                    <td class="px-6 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.services }}</td>
-                                                    <td class="px-6 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.total_budget }}</td>
-                                                    <td class="px-6 py-4 sm:w-[300px] md:w-[400px] lg:w-[500px]">{{ entry.code }}</td>
-                                                    <td class="px-6 py-4 sm:w-[350px] md:w-[450px] lg:w-[550px]">{{ entry.remarks }}</td>
-                                                    {% if request.user.is_superuser %}
-                                                        <td class="px-6 py-4">
-                                                            <p class="text-blue-500 hover:text-blue-700 cursor-pointer"
-                                                               onclick="event.stopPropagation(); showUpdateForm('{{ entry.code }}')">
-                                                                Update
-                                                            </p>
-                                                        </td>
-                                                    {% endif %}
-                                                </tr>
-                                            {% endfor %}
-                                        {% else %}
-                                            {% if page_obj %}
-                                                {% for entry in page_obj %}
-                                                    <tr class="hover:bg-gray-100 cursor-pointer"
-                                                        onclick="showUploadedFiles('{{ entry.code }}', '{{ entry.code }}')">
-                                                        <td class="px-8 py-4 sm:w-[700px] md:w-[800px] lg:w-[1000px]">{{ entry.ppa }}</td>
-                                                        <td class="px-8 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.implementing_unit }}</td>
-                                                        <td class="px-8 py-4 sm:w-[300px] md:w-[400px] lg:w-[500px]">{{ entry.code }}</td>
-                                                        <td class="px-8 py-4 sm:w-[350px] md:w-[450px] lg:w-[550px]">{{ entry.remarks }}</td>
-                                                        {% if request.user.is_superuser  %}
-                                                            <td class="px-8 py-4">
-                                                                <p class="text-blue-500 hover:text-blue-700 cursor-pointer"
-                                                                   onclick="event.stopPropagation(); showUpdateForm('{{ entry.code }}')">
-                                                                    Update
-                                                                </p>
-                                                            </td>
-                                                        {% endif %}
-                                                    </tr>
-                                                {% endfor %}
-                                            {% else %}
-                                                <tr>
-                                                    <td colspan="5" class="px-8 py-4 text-center text-gray-500">No projects found.</td>
-                                                </tr>
-                                            {% endif %}
-                                        {% endif %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <!-- Back Button -->
-                            <div class="w-full sm:w-auto order-2 sm:order-1">
-                                <a href="{% url 'homepage' %}"
-                                   class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
-                                    <svg class="w-5 h-5 mr-2"
-                                         fill="none"
-                                         stroke="currentColor"
-                                         viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                    </svg>
-                                    Back to Homepage
-                                </a>
-                            </div>
-                            <!-- Pagination Controls -->
-                            <nav class="w-full sm:w-auto order-1 sm:order-2">
-                                <ul class="flex items-center justify-center sm:justify-end -space-x-px">
-                                    {% if page_obj.has_previous %}
-                                        <li>
-                                            <a href="?page=1"
-                                               class="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">First</a>
-                                        </li>
-                                        <li>
-                                            <a href="?page={{ page_obj.previous_page_number }}"
-                                               class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
-                                        </li>
-                                    {% endif %}
-                                    <li>
-                                        <span class="px-3 py-2 leading-tight text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">
-                                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                                        </span>
-                                    </li>
-                                    {% if page_obj.has_next %}
-                                        <li>
-                                            <a href="?page={{ page_obj.next_page_number }}"
-                                               class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
-                                        </li>
-                                        <li>
-                                            <a href="?page={{ page_obj.paginator.num_pages }}"
-                                               class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Last</a>
-                                        </li>
-                                    {% endif %}
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </main>
-            </div>
-            <!-- DETAILS  -->
-            <div class="details" id="details">
-                <a href="?project_code={{ entry.code }}">  <!-- Add project_code as query parameter -->
-                    <i class="material-icons x" id="exit">close</i>
-                </a>
-                <a href="?project_code={{ entry.code }}">  <!-- Same here -->
-                    <h1 class="form-title">PROJECT DETAILS</h1>
-                </a>
-            </div>
-            <div class="details" id="update">
-                {% for entry in all_entries %}
-                    <div class="entry-box" id="entry_{{ entry.code }}">
-                        <!-- Update Form -->
-                        <!-- <p>
-            <span class="entry-title">Project Code:</span> {{ entry.code }}
-         </p> -->
-                        <form id="updateForm_{{ entry.code }}"
-                              action="{% url 'update_entry' 'procurements' %}"
-                              method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="entry_code" value="{{ entry.code }}">
-                            <!-- Hidden Fields -->
-                            <input type="hidden" name="ppa" value="{{ entry.ppa }}">
-                            <input type="hidden"
-                                   name="implementing_unit"
-                                   value="{{ entry.implementing_unit }}">
-                            <input type="hidden" name="location" value="{{ entry.location }}">
-                            <input type="hidden" name="start_date" value="{{ entry.start_date }}">
-                            <input type="hidden" name="end_date" value="{{ entry.end_date }}">
-                            <input type="hidden" name="services" value="{{ entry.services }}">
-                            <input type="hidden" name="year" value="{{ entry.year }}">
-                            <!-- Remarks -->
-                            <p style="color: white">{{ entry.code }}</p>
-                            <div class="user-input-box"
-                                 style="display: flex;
-                                        flex-direction: column;
-                                        align-items: center">
-                                <label for="remarks_{{ entry.code }}">Remarks</label>
-                                <select id="remarks_{{ entry.code }}"
-                                        name="remarks"
-                                        class="user-input"
-                                        style="text-align: center;
-                                               text-align-last: center">
-                                    <option value="" disabled selected>{{ entry.remarks }}</option>
-                                    <option value="No PPMP/APP/POW"
-                                            {% if entry.remarks == "No PPMP/APP/POW" %}selected{% endif %}>
-                                        No PPMP/APP/POW
-                                    </option>
-                                    <option value="Awarded Already"
-                                            {% if entry.remarks == "Awarded Already" %}selected{% endif %}>
-                                        Awarded Already
-                                    </option>
-                                    <option value="Finished Already"
-                                            {% if entry.remarks == "Finished Already" %}selected{% endif %}>
-                                        Finished Already
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="form-submit-btn">
-                                <input type="submit" value="Update">
-                            </div>
-                        </form>
-                        <!-- Inside each entry box -->
-                    {% endfor %}
-                </div>
-                <!-- 🔽 This form is now OUTSIDE the loop so it only shows once -->
-                <!-- Global Upload Form (Initially Hidden) -->
-                <!-- Global Upload Form --><!-- 🔄 Always-Visible Upload Form -->
-                <div id="uploadSection">
-                    <form id="globalUploadForm"
-                          method="POST"
-                          enctype="multipart/form-data"
-                          action="{% url 'upload_excel' %}">
-                        {% csrf_token %}
-                        <!-- Hidden field for detected project code -->
-                        <input type="hidden" name="project_code" id="upload_project_code">
-                        <!-- File Type Dropdown and Button Section (inline) -->
-                        <div class="form-row style="
-                             "
-                             display:
-                             flex
-                             flex-direction:
-                             column
-                             align-items:
-                             center
-                             ">
-                            <label for="file_type" class="form-label">File Type:</label>
-                            <select name="file_type" class="form-select" required>
-                                <option value="PPMP">PPMP</option>
-                                <option value="APP">APP</option>
-                                <option value="POW">POW</option>
-                            </select>
-                            <!-- File Input Button -->
-                            <input type="file"
-                                   name="excel_file"
-                                   id="fileInput"
-                                   required
-                                   class="hidden-file"
-                                   onchange="displaySelectedFile()">
-                            <!-- Remove File "X" Button -->
-                            <span id="removeFileBtn"
-                                  onclick="removeSelectedFile()"
-                                  style="cursor: pointer;
-                                         font-weight: bold;
-                                         color: #f87171;
-                                         margin-left: 10px;
-                                         display: none">✕</span>
-                        </div>
-                        <!-- File Preview -->
-                        <p id="fileDisplay" class="file-preview"></p>
-                        <!-- Submit Button -->
-                        <div class="form-submit-btn">
-                            <button type="submit" class="btn submit-btn">Upload</button>
-                        </div>
-                    </form>
-                </div>
-                <a href="{% url 'procurements' %}">
-                    <div class="form-submit-btn" style="margin-top: 30px;">
-                        <div class="exit"
-                             style="background-color: red;
-                                    padding: 10px 20px;
-                                    color: white;
-                                    border-radius: 5px;
-                                    text-align: center">Exit</div>
-                    </div>
-                </a>
-            </div>
-            <script>const isSuperuser = "{{ request.user.is_superuser|yesno:'true,false' }}" === "true";</script>
-            <script>
-    function autoUpload(fileInput, projectCode) {
-      const form = document.getElementById('globalUploadForm');
-      const projectCodeInput = document.getElementById('upload_project_code');
-      const fileInputTarget = document.getElementById('fileInput');
-  
-      // Set the values
-      projectCodeInput.value = projectCode;
-      fileInputTarget.files = fileInput.files;
-  
-      // Auto-submit
-      form.submit();
-    }
-    function removeSelectedFile() {
-    const fileInput = document.getElementById('fileInput');
-    const fileDisplay = document.getElementById('fileDisplay');
-    const removeBtn = document.getElementById('removeFileBtn');
-
-    fileInput.value = "";
-    fileDisplay.textContent = "File removed.";
-    removeBtn.style.display = "none";
+<html lang="en"> {% csrf_token %} <head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" type="x-icon" href="{% static 'KwentasApp/img/logobrowser.jpg' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Procurements</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a81368914c.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'KwentasApp/css/procurements.css' %}">
+    <style>
+  #overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6); /* dark overlay */
+    z-index: 999;
+    display: none;
   }
-            </script>
-            <!------------------------------------------------------ JAVASCRIPT-------------------------------------------------->
-            <!-- PIE CHART JS -->
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <script>
-      // Add an event listener to the project link
-      document.querySelector('a[href="?project_code={{ entry.code }}"]').addEventListener('click', function(event) {
-          event.preventDefault();  // Prevent the default action (e.g., navigating)
+
+  #update {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    max-height: 90vh;
+    overflow-y: auto;
+    width: 90%;
+    max-width: 600px;
+    display: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Optional: blur background content */
+  #customers_table.blur {
+    filter: blur(10px);
+    pointer-events: none;
+  }
+</style>
+
+
+  </head>
+  <body>
+ 
+    <div class="flex h-screen">
+
+    {% include 'KwentasApp/partials/aside.html' %}
+
+    <main class="flex-1 transition-margin duration-300 ml-0 md:ml-64 min-h-screen bg-gray-100 dark:bg-gray-900">
+
+      <div class="p-2 sm:p-4 md:p-8 w-full max-w-[100vw] overflow-hidden">
+        <!-- Mobile Header with Menu Button -->
+        <div class="md:hidden mb-4 flex items-center">
+            <button id="mobileSidebarToggle" class="p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            <h1 class="ml-2 text-xl font-semibold">Current Projects</h1>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4"> <!-- Grid container -->
+          <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-800 dark:border-neutral-700 p-4"> <!-- Adjusted padding -->
+              <div class="flex items-center justify-between">
+                  <div>
+                      <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">
+                          Continuing Projects
+                      </p>
+                      <h2 class="text-xl font-medium text-gray-800 dark:text-neutral-200">
+                        {% if matched_entries_2024_and_above %}
+                        {{ matched_entries_2024_and_above|length }} Projects
+                    {% elif page_obj %}
+                        {{ page_obj|length }} Projects  
+                    {% else %}
+                        0 Projects
+                    {% endif %}
+                    under 20% Local Development Fund
+                      </h2>
+                  </div>
+              </div>
+          </div>
+      
+          <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-neutral-800 dark:border-neutral-700 p-4"> <!-- Adjusted padding -->
+              <div class="flex items-center justify-between">
+                  <div>
+                      <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-neutral-500">
+                          Project Remarks
+                      </p>
+                      <h2 class="text-xl font-medium text-gray-800 dark:text-neutral-200">
+                          {{ awarded_count }} Projects Awarded Already
+                      </h2>
+                  </div>
+                  <div class="hs-tooltip">
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg mt-3 p-3 sm:p-4 md:p-6 flex flex-col justify-between min-h-[90vh] w-full">
+
+        <div class="mb-4">
+          <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">Procurements</h1>
+          <div class="flex items-center gap-4">
+              <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Manage and monitor ongoing project details</p>
+          </div>
+      </div>
+
+
+      <div class="mb-4 sm:mb-6 grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-4">
+        <!-- Sort -->
+        <div class="relative w-full">
+            <form method="GET" action="" class="w-full">
+                <select name="sort" id="sort" onchange="this.form.submit()" 
+                        class="w-full px-4 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <option value="" {% if not sort_option %}selected{% endif %}>Sort by</option>
+                    <option value="recent" {% if sort_option == 'recent' %}selected{% endif %}>Recently Added</option>
+                    <option value="oldest" {% if sort_option == 'oldest' %}selected{% endif %}>Oldest Added</option>
+                </select>
+            </form>
+        </div>
+
+        <!-- Search -->
+        <div class="relative col-span-1 md:col-span-2 w-full">
+            <form method="GET" action="{% url 'search_projects' 'continuing' %}" class="w-full">
+                <div class="relative">
+                    <input type="text" 
+                           id="search-input" 
+                           name="query" 
+                           class="w-full pl-10 pr-4 py-2.5 text-gray-700 bg-white border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-sm hover:border-gray-400 transition-colors duration-200"
+                           placeholder="Search Continuing Projects...">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                </div>
+            </form>
+            <div id="search-results"></div>
+        </div>
+    </div>
+
+    <div class="mb-4 sm:mb-6 flex-grow overflow-hidden">
+      <!-- Use flex to expand the width of the container and table -->
+      <div class="relative flex w-full max-w-full lg:max-w-full overflow-x-auto" style="min-height: 65vh;">
+          <!-- Table width set to take full available space -->
+          <table class="min-w-full table-auto border-separate border-spacing-0 w-full">
+              <thead class="text-xs text-gray-700 uppercase bg-gray-50/50 dark:bg-gray-700/50 dark:text-gray-400">
+                  <tr>
+                      <!-- Increased width for PPA with responsive design -->
+                      <th scope="col" class="px-6 py-3 w-1/2 text-left font-semibold text-gray-700 sm:w-[600px] md:w-[700px] lg:w-[800px]">PPA</th>
+                      <th scope="col" class="px-6 py-3 w-auto text-left font-semibold text-gray-700 sm:w-[450px] md:w-[550px] lg:w-[650px]">Implementing Unit</th>
+                 
+                      <th scope="col" class="px-6 py-3 text-left font-semibold text-gray-700 sm:w-[300px] md:w-[400px] lg:w-[500px]">Code</th>
+                      <th scope="col" class="px-6 py-3 text-left font-semibold text-gray-700 sm:w-[350px] md:w-[450px] lg:w-[550px]">Remarks</th>
+                      {% if request.user.is_superuser or request.user.department == 'BAC Office' %}
+                          <!-- Action column -->
+                          <th scope="col" class="px-6 py-3 text-left font-semibold text-gray-700">Action</th>
+                      {% endif %}
+                  </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                  {% if matched_entries %}
+                      {% for entry in matched_entries %}
+                           <tr class="hover:bg-gray-100 cursor-pointer"
+                                                    onclick="showUploadedFiles('{{ entry.code }}', '{{ entry.code }}')">
+                              <td class="px-6 py-4 sm:w-[700px] md:w-[800px] lg:w-[1000px]">{{ entry.ppa }}</td>
+                              <td class="px-6 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.implementing_unit }}</td>
+                              <td class="px-6 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.services }}</td>
+                              <td class="px-6 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.total_budget }}</td>
+                              <td class="px-6 py-4 sm:w-[300px] md:w-[400px] lg:w-[500px]">{{ entry.code }}</td>
+                              <td class="px-6 py-4 sm:w-[350px] md:w-[450px] lg:w-[550px]">{{ entry.remarks }}</td>
+                              {% if request.user.is_superuser or request.user.department == 'BAC Office' %}
+                                  <td class="px-6 py-4">
+                                     <p class="text-blue-500 hover:text-blue-700 cursor-pointer" onclick="event.stopPropagation(); showUpdateForm('{{ entry.code }}')">Update</p>
+
+                                  </td>
+                              {% endif %}
+                          </tr>
+                      {% endfor %}
+                  {% else %}
+                      {% if page_obj %}
+                          {% for entry in page_obj %}
+                               <tr class="hover:bg-gray-100 cursor-pointer"
+                                                        onclick="showUploadedFiles('{{ entry.code }}', '{{ entry.code }}')">
+                                  <td class="px-8 py-4 sm:w-[700px] md:w-[800px] lg:w-[1000px]">{{ entry.ppa }}</td>
+                                  <td class="px-8 py-4 sm:w-[450px] md:w-[550px] lg:w-[650px]">{{ entry.implementing_unit }}</td>
+                                  <td class="px-8 py-4 sm:w-[300px] md:w-[400px] lg:w-[500px]">{{ entry.code }}</td>
+                                  <td class="px-8 py-4 sm:w-[350px] md:w-[450px] lg:w-[550px]">{{ entry.remarks }}</td>
+                                  {% if request.user.is_superuser or request.user.department == 'BAC Office' %}
+                                      <td class="px-8 py-4">
+                                         <p class="text-blue-500 hover:text-blue-700 cursor-pointer" onclick="event.stopPropagation(); showUpdateForm('{{ entry.code }}')">Update</p>
+
+                                      </td>
+                                  {% endif %}
+                              </tr>
+                          {% endfor %}
+                      {% else %}
+                          <tr>
+                              <td colspan="5" class="px-8 py-4 text-center text-gray-500">No projects found.</td>
+                          </tr>
+                      {% endif %}
+                  {% endif %}
+              </tbody>
+          </table>
+      </div>
+  </div>
+    
+    
+    
   
-          // Show SweetAlert with the message 'Hi'
-          Swal.fire({
-              title: 'Hi!',
-              text: 'You clicked on the project.',
-              icon: 'info',
-              confirmButtonText: 'OK'
-          });
-      });
-            </script>
-            <script>function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            const [k, v] = cookie.trim().split('=');
-            if (k === name) {
-                cookieValue = decodeURIComponent(v);
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}const csrftoken = getCookie('csrftoken');
+  <div class="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <!-- Back Button -->
+    <div class="w-full sm:w-auto order-2 sm:order-1">
+        <a href="{% url 'homepage' %}" 
+           class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Back to Homepage
+        </a>
+    </div>
 
-fetch(`/procurements/delete/${fileId}/`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken,
-    },
-    body: JSON.stringify({
-        // any necessary data to be sent, if needed
-    })
-}).then(response => {
-    if (response.ok) {
-        console.log('Delete successful');
-    } else {
-        console.error('Delete failed');
-    }
-}).catch(error => {
-    console.error('Error:', error);
-});
+    <!-- Pagination Controls -->
+    <nav class="w-full sm:w-auto order-1 sm:order-2">
+        <ul class="flex items-center justify-center sm:justify-end -space-x-px">
+            {% if page_obj.has_previous %}
+                <li>
+                    <a href="?page=1" class="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">First</a>
+                </li>
+                <li>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
+                </li>
+            {% endif %}
 
-  function showUploadedFiles(projectCode) {
+            <li>
+                <span class="px-3 py-2 leading-tight text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li>
+                    <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
+                </li>
+                <li>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+    </div>
+    </main>
+    </div>
+
+
+    <!-- DETAILS  -->
+    <div class="details" id="details">
+      <a href="{% url 'procurements' %}">
+        <i class="material-icons x" id="exit">close</i>
+      </a>
+      <a href="{% url 'procurements' %}">
+        <h1 class="form-title">PROJECT DETAILS</h1>
+      </a>
+      <ul> {% for entry in all_entries %} <li class="entry-item" id="details-{{ entry.code }}" style="display: none;">
+          <div class="details-container">
+            <div class="main-user-info" id="main-detail">
+              <div class="user-input-box">
+                <p class="label">PPA</p>
+                <p id="fullName" class="user-text">{{ entry.ppa }}</p>
+              </div>
+              <div class="user-input-box">
+                <p class="label">Implementing Unit</p>
+                <p id="username" class="user-text">{{ entry.implementing_unit }}</p>
+              </div>
+              <div class="user-input-box">
+                <p class="label">Location</p>
+                <p id="email" class="user-text">{{ entry.location }}</p>
+              </div>
+              <div class="user-input-box">
+                <p class="label">Appropriation</p>
+                <p id="phoneNumber" class="user-text">₱{{ entry.appropriation|intcomma }}</p>
+              </div>
+              <div class="user-input-box">
+                <p class="label">Remarks</p>
+                <p id="password" class="user-text">{{ entry.remarks }}</p>
+              </div>
+              <div class="user-input-box">
+                <p class="label">Start Date</p>
+                <p id="confirmPassword" class="user-text">{{ entry.start_date }}</p>
+              </div>
+              <div class="user-input-box">
+                <p class="label">End Date</p>
+                <p id="endDate" class="user-text">{{ entry.end_date }}</p>
+              </div>
+              <div class="user-input-box">
+                <p class="label">Code</p>
+                <p id="code" class="user-text">{{ entry.code }}</p>
+              </div>
+              <div class="user-input-box">
+                <p class="label">Services</p>
+                <p id="services" class="user-text">{{ entry.services }}</p>
+              </div>
+              <div class="user-input-box">
+                <p class="label">Year</p>
+                <p id="year" class="user-text">{{ entry.year }}</p>
+              </div>
+              <div class="user-input-box">
+                <p class="label">Total Budget</p>
+                <p id="totalBudget" class="user-text">₱{{ entry.overall_budget|intcomma }}</p>
+              </div>
+             
+              <div class="user-input-box">
+                <p class="label">Total Added Budget</p>
+                <p id="totalSpent" class="user-text">₱{{ entry.added_budget|intcomma }}</p>
+              </div>
+              <div class="user-input-box">
+                <p class="label">Remaining Balance</p>
+                <p id="remainingBalance" class="user-text">₱{{ entry.remaining_total_balance|intcomma }}</p>
+              </div>
+              <div class="user-input-box">
+                <p class="label">Remaining Obligation</p>
+                <p id="remainingObligations" class="user-text">₱{{ entry.remaining_obligations|intcomma }}</p>
+              </div>
+              <div class="user-input-box">
+                <p class="label">Total Obligation</p>
+                <p id="totalObligations" class="user-text">₱{{ entry.total_obligations|intcomma }}</p>
+              </div>
+              <div class="user-input-box">
+                <p class="label">Total Spent</p>
+                <p id="totalAddedBudget" class="user-text">₱{{ entry.total_disbursements|intcomma }}</p>
+              </div>
+            </div>
+            
+            <div class="chart-container" data-entry-code="{{ entry.code }}" id="chart">
+              <div class="user-input-box">
+                <p class="label">Utilization Rate: </p>
+                <span class="utilizationRate">{{ entry.utilization_rate|floatformat:"-2" }} %</span>
+              </div>
+              <canvas class="pie-chart"></canvas>
+            </div>
+          </div>
+          <div class="tables-container">
+            <div class="table-box">
+              <span class="table-title">Added Budget</span>
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Amount</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody> {% for budget in entry.budget_data %} <tr>
+                      <td>{{ budget.name|intcomma }}</td>
+                      <td>₱{{ budget.added_budget|intcomma }}</td>
+                      <td>{{ budget.date }}</td>
+                    </tr> {% endfor %} </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="table-box">
+              <span class="table-title">Added Obligation</span>
+              <br>
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Amount</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody> {% for obligation in entry.obligation %} <tr>
+                      <td>{{ obligation.name }}</td>
+                      <td>₱{{ obligation.obligation|intcomma }}</td>
+                      <td>{{ obligation.date}}</td>
+                    </tr> {% endfor %} </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="table-box">
+              <span class="table-title">Added Disbursement</span>
+              <br>
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Amount</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody> {% for disbursement in entry.disbursement %} <tr>
+                      <td>{{ disbursement.name }}</td>
+                      <td>₱{{ disbursement.disbursement|intcomma }}</td>
+                      <td>{{ disbursement.date}}</td>
+                    </tr> {% endfor %} </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </li> {% endfor %} </ul>
+    </div>
+
+     <!-- UPDATE  -->
+         <div class="overlay" id="overlay"></div>
+
+    <div class="details" id="update">
+        {% for entry in all_entries %}
+        <form id="updateForm_{{ entry.code }}" action="{% url 'update_entry' 'procurements' %}" onsubmit="handleSubmit(event)" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="entry_code" value="{{ entry.code }}">
+          
+          <!-- Hidden Fields for Other Data -->
+          <input type="hidden" name="ppa" value="{{ entry.ppa }}">
+          <input type="hidden" name="implementing_unit" value="{{ entry.implementing_unit }}">
+          <input type="hidden" name="location" value="{{ entry.location }}">
+          <input type="hidden" name="start_date" value="{{ entry.start_date }}">
+          <input type="hidden" name="end_date" value="{{ entry.end_date }}">
+          <input type="hidden" name="code" value="{{ entry.code }}">
+          <input type="hidden" name="services" value="{{ entry.services }}">
+          <input type="hidden" name="year" value="{{ entry.year }}">
+      
+          <!-- Visible Field for Remarks -->
+          <div class="user-input-box" style="display: flex; flex-direction: column; align-items: center;">
+            <label for="remarks_{{ entry.code }}">Remarks</label>
+            <select id="remarks_{{ entry.code }}" name="remarks" class="user-input" style="text-align: center; text-align-last: center;">
+              <option value="" disabled selected>{{ entry.remarks }}</option>
+              <option value="No PPMP/APP/POW" {% if entry.remarks == "No PPMP/APP/POW" %}selected{% endif %}>No PPMP/APP/POW</option>
+              <option value="Awarded Already" {% if entry.remarks == "Awarded Already" %}selected{% endif %}>Awarded Already</option>
+              <option value="Finished Already" {% if entry.remarks == "Finished Already" %}selected{% endif %}>Finished Already</option>
+            </select>
+          </div>
+      
+          <!-- Submit Button -->
+          <div class="form-submit-btn">
+            <input type="submit" value="Update">
+          </div>
+          <a href="{% url 'procurements' %}">
+            <div class="form-submit-btn">
+             <div class="exit" style="background-color: red;">Exit</div>
+            </div>
+          </a>
+        </form>
+        {% endfor %}
+        
+        <div id="uploadSection" class="p-6 bg-white rounded-xl shadow-md max-w-md mx-auto mt-10">
+    <form id="globalUploadForm"
+          method="POST"
+          enctype="multipart/form-data"
+          action="{% url 'upload_excel' %}"
+          class="space-y-6">
+        {% csrf_token %}
+        <!-- Hidden field for detected project code -->
+        <input type="hidden" name="project_code" id="upload_project_code">
+
+        <!-- File Type Dropdown and File Input -->
+        <div class="flex flex-col items-center space-y-4">
+            <label for="file_type" class="text-sm font-medium text-gray-700">File Type:</label>
+            <select name="file_type"
+                    class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
+                <option value="PPMP">PPMP</option>
+                <option value="APP">APP</option>
+                <option value="POW">POW</option>
+            </select>
+
+            <!-- File Input -->
+            <div class="flex items-center space-x-2 w-full">
+                <input type="file"
+                       name="excel_file"
+                       id="fileInput"
+                       required
+                       class="block w-full text-sm text-gray-700
+                              file:mr-4 file:py-2 file:px-4
+                              file:rounded-full file:border-0
+                              file:text-sm file:font-semibold
+                              file:bg-blue-50 file:text-blue-700
+                              hover:file:bg-blue-100"
+                       onchange="displaySelectedFile()">
+
+                <!-- Remove File Button -->
+                <span id="removeFileBtn"
+                      onclick="removeSelectedFile()"
+                      class="cursor-pointer text-red-500 text-xl hidden">✕</span>
+            </div>
+        </div>
+
+        <!-- File Preview -->
+        <p id="fileDisplay" class="text-sm text-gray-500 text-center"></p>
+
+        <!-- Submit Button -->
+        <div class="text-center">
+            <button type="submit"
+                    class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">
+                Upload
+            </button>
+            
+        </div>
+    </form>
+</div>
+
+      </div>
+      
+   
+    <!------------------------------------------------------ JAVASCRIPT-------------------------------------------------->
+   
+    <!-- PIE CHART JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  
+
+
+<script>
+    const isSuperuser = "{{ request.user.is_superuser|yesno:'true,false' }}" === "true";
+  </script>
+<script>  
+function getCookie(name) {
+  var cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+          }
+      }
+  }
+  return cookieValue;
+}
+
+var csrftoken = getCookie('csrftoken');
+
+function showUploadedFiles(projectCode) {
+  document.getElementById('upload_project_code').value = projectCode;
+
   fetch(`/get_uploaded_files/?project_code=${projectCode}`)
     .then(r => r.json())
     .then(data => {
-      console.log('Fetched files:', data); 
+      console.log('Fetched files:', data);
+
       if (!data.files.length) {
         return Swal.fire({
           title: 'No Files Found',
@@ -462,7 +560,7 @@ fetch(`/procurements/delete/${fileId}/`, {
         });
       }
 
-      // Build each list item, including “Delete” for admins
+      // Build file list
       const filesList = data.files.map(file => {
         let html = `
           <li style="margin-bottom: 0.5em;">
@@ -471,6 +569,7 @@ fetch(`/procurements/delete/${fileId}/`, {
             <br>
             <a href="${file.file_url}" download class="download-link">⬇ Download</a>
         `;
+
         if (isSuperuser) {
           html += `
             &nbsp;|&nbsp;
@@ -479,61 +578,86 @@ fetch(`/procurements/delete/${fileId}/`, {
             </button>
           `;
         }
+
         html += `</li>`;
         return html;
       }).join('<hr>');
 
-      Swal.fire({
-        title: 'Uploaded Files',
-        html: `<ul style="text-align:left; padding-left:20px; list-style:disc">${filesList}</ul>`,
-        width: 600,
-        showCloseButton: true,
-      }).then(() => {
-        // nothing to do on close
-      });
+      // Add "Download All" button if more than one file
+      let downloadAllBtn = '';
+      if (data.files.length > 1) {
+        downloadAllBtn = `
+          <div style="text-align:right; margin-bottom:10px;">
+            <button id="bulk-download-btn" style="background-color:#3498db; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">
+              ⬇ Download All (Individually)
+            </button>
+          </div>
+        `;
+      }
 
-      // After Swal is in the DOM, wire up the delete handlers
-      document.querySelectorAll('.swal-delete-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const fileId = btn.getAttribute('data-id');
-          console.log(`Attempting to delete file with ID: ${fileId}`); // Debugging log
-          Swal.fire({
-            title: 'Confirm Deletion',
-            text: 'Are you sure you want to delete this file?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, delete it'
-          }).then(result => {
-            if (result.isConfirmed) {
-              console.log('Confirmed deletion, sending request...');
-              fetch(`/procurements/delete/${fileId}/`, {
-                method: 'POST',
-                headers: {
-                  'X-CSRFToken': csrftoken,
-                  'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin',
-              })
-              .then(resp => {
-                console.log('Delete response:', resp); // Debugging log
-                if (!resp.ok) {
-                  console.error('Delete failed with status:', resp.status);
-                  throw new Error('Delete failed');
+      // Show SweetAlert modal
+   Swal.fire({
+  title: 'Uploaded Files',
+  html: `${downloadAllBtn}<ul style="text-align:left; padding-left:20px; list-style:disc">${filesList}</ul>`,
+  width: 600,
+  showCloseButton: true,
+  allowOutsideClick: true,  // ✅ allow clicking outside to close
+  backdrop: true,           // ✅ shows overlay and prevents clicks behind
+  focusConfirm: false,      // optional: avoids auto-focus on confirm button
+  didOpen: () => {
+          // Hook delete buttons
+          document.querySelectorAll('.swal-delete-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const fileId = btn.getAttribute('data-id');
+              Swal.fire({
+                title: 'Confirm Deletion',
+                text: 'Are you sure you want to delete this file?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it'
+              }).then(result => {
+                if (result.isConfirmed) {
+                  fetch(`/procurements/delete/${fileId}/`, {
+                    method: 'POST',
+                    headers: {
+                      'X-CSRFToken': csrftoken,
+                      'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin',
+                  })
+                  .then(resp => {
+                    if (!resp.ok) throw new Error('Delete failed');
+                    return resp.json();
+                  })
+                  .then(() => {
+                    Swal.fire('Deleted!', 'The file has been removed.', 'success');
+                    showUploadedFiles(projectCode); // Refresh file list
+                  })
+                  .catch(() => {
+                    Swal.fire('Error', 'Could not delete the file.', 'error');
+                  });
                 }
-                return resp.json(); 
-              })
-              .then(data => {
-                console.log('File deletion response:', data); // Debugging log
-                Swal.fire('Deleted!', 'The file has been removed.', 'success');
-                showUploadedFiles(projectCode);
-              })
-              .catch(err => {
-                console.error('Error:', err); // Debugging log
-                Swal.fire('Error', 'Could not delete the file.', 'error');
               });
-            }
+            });
           });
-        });
+
+          // Hook bulk download button
+          const bulkBtn = document.getElementById('bulk-download-btn');
+          if (bulkBtn) {
+            bulkBtn.addEventListener('click', () => {
+              data.files.forEach((file, index) => {
+                setTimeout(() => {
+                  const a = document.createElement('a');
+                  a.href = file.file_url;
+                  a.download = file.file_name;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                }, index * 500); // space out downloads
+              });
+            });
+          }
+        }
       });
     })
     .catch(err => {
@@ -541,9 +665,34 @@ fetch(`/procurements/delete/${fileId}/`, {
       Swal.fire('Error', 'There was an error retrieving the files.', 'error');
     });
 }
+// Trigger file input click
+function triggerFileInput() {
+    document.getElementById('fileInput').click();
+}
 
-            </script>
-            <script>
+function displaySelectedFile() {
+    const file = document.getElementById('fileInput').files[0];
+    if (file) {
+        document.getElementById('fileDisplay').innerText = 'Selected file: ' + file.name;
+        document.getElementById('removeFileBtn').style.display = 'inline';
+    } else {
+        document.getElementById('fileDisplay').innerText = '';
+        document.getElementById('removeFileBtn').style.display = 'none';
+    }
+}
+
+function removeSelectedFile() {
+    const fileInput = document.getElementById('fileInput');
+    const fileDisplay = document.getElementById('fileDisplay');
+    const removeBtn = document.getElementById('removeFileBtn');
+
+    fileInput.value = '';
+    fileDisplay.textContent = 'File removed.';
+    removeBtn.style.display = 'none';
+}
+
+
+
   //INPUT MASKING 
   document.getElementById('obligation-input').addEventListener('input', function (e) {
       // Remove any non-numeric characters except commas
@@ -555,8 +704,8 @@ fetch(`/procurements/delete/${fileId}/`, {
       // Set the formatted value back to the input field
       e.target.value = value;
   });
-            </script>
-            <script>
+</script>
+    <script>
       document.addEventListener('DOMContentLoaded', function() {
         var chartContainers = document.querySelectorAll('.chart-container');
         chartContainers.forEach(function(container) {
@@ -596,9 +745,9 @@ fetch(`/procurements/delete/${fileId}/`, {
           });
         });
       });
-            </script>
-            <!-- Details js -->
-            <script>
+    </script>
+    <!-- Details js -->
+    <script>
       function showDetails(code) {
         document.getElementById('customers_table').style.filter = 'blur(10px)';
         document.getElementById('overlay').style.display = 'block';
@@ -609,53 +758,24 @@ fetch(`/procurements/delete/${fileId}/`, {
         document.getElementById('details-' + code).style.display = 'block';
         document.getElementById('details').style.display = 'block';
       }
-            </script>
-            <!-- Update js -->
-            <script>
-        function triggerFileInput() {
-    document.getElementById('fileInput').click();
-  }
-
-  function displaySelectedFile() {
-    const file = document.getElementById('fileInput').files[0];
-    if (file) {
-      document.getElementById('fileDisplay').innerText = 'Selected file: ' + file.name;
-    } else {
-      document.getElementById('fileDisplay').innerText = '';
-    }
-  }function showUpdateForm(code) {
-  console.log("Project Code:", code);
-
-  // Hide all update forms
-  var allUpdateForms = document.querySelectorAll('[id^="updateForm_"]');
-  allUpdateForms.forEach(function(form) {
-    form.style.display = 'none';
-  });
-
-  // Show selected update form
-  var updateForm = document.getElementById('updateForm_' + code);
-  if (updateForm) {
-    updateForm.style.display = 'block';
-  }
-
-  // Show overlays
-  document.getElementById('update').style.display = 'block';
-
-  document.getElementById('overlay').style.display = 'block';
-
-  // 🧠 Set the project code in the upload form
-  document.getElementById('upload_project_code').value = code;
-  document.getElementById('uploadHeader').innerText = 'Uploading file for Project Code: ' + code;
-
-  // 🐞 DEBUG DISPLAY
-  document.getElementById('debugCode').innerText = 'DEBUG: Project Code = ' + code;
-
-  // Reset file input preview
-  document.getElementById('fileInput').value = '';
-  document.getElementById('fileDisplay').innerText = '';
-}
-            </script>
-            <script>
+    </script>
+    <!-- Update js -->
+    <script>
+      function showUpdateForm(code) {
+        var allUpdateForms = document.querySelectorAll('[id^="updateForm_"]');
+        allUpdateForms.forEach(function(form) {
+          form.style.display = 'none';
+        });
+        var updateForm = document.getElementById('updateForm_' + code);
+        if (updateForm) {
+          updateForm.style.display = 'block';
+        }
+        document.getElementById('update').style.display = 'block';
+        document.getElementById('customers_table').style.filter = 'blur(10px)';
+        document.getElementById('overlay').style.display = 'block';
+      }
+    </script>
+    <script>
       // Function to handle form submission
       function handleSubmit(event) {
         event.preventDefault(); // Prevent default form submission
@@ -700,8 +820,9 @@ fetch(`/procurements/delete/${fileId}/`, {
         }
         return true; // Return true if all validations pass
       }
-            </script>
-            <script>
+    </script>
+
+    <script>
       function hideOverlay() {
         document.getElementById('overlay').style.display = 'none';
         document.getElementById('customers_table').style.filter = 'none';
@@ -717,10 +838,11 @@ fetch(`/procurements/delete/${fileId}/`, {
         if (deleteForm) deleteForm.style.display = 'none';
       }
       document.getElementById('overlay').addEventListener('click', hideOverlay);
-            </script>
-            {% if messages %}
-                {% for message in messages %}
-                    <script type="text/javascript">
+    </script>
+
+{% if messages %}
+    {% for message in messages %}
+        <script type="text/javascript">
             document.addEventListener('DOMContentLoaded', function() {
                 // Create an array to hold messages
                 var messages = [];
@@ -750,11 +872,12 @@ fetch(`/procurements/delete/${fileId}/`, {
                     }
                 });
             });
-                    </script>
-                {% endfor %}
-            {% endif %}
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-            <script>
+        </script>
+    {% endfor %}
+{% endif %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
   $(document).ready(function() {
       $('#search-input').on('input', function() {
           let query = $(this).val();
@@ -774,12 +897,13 @@ fetch(`/procurements/delete/${fileId}/`, {
                                   <td class="implementing-unit" onclick="showDetails('${entry.code}')">${entry.implementing_unit}</td>
                                   <td class="code" onclick="showDetails('${entry.code}')">${entry.code}</td>
                                   <td class="year" onclick="showDetails('${entry.code}')">${entry.remarks}</td>
-                  {% if request.user.is_superuser  %}
+                  {% if request.user.is_superuser or request.user.department == 'BAC Office' %}
                      
                       <td>
-                            <p class="status update" onclick="showUpdateForm('${entry.code}')">Update</p><br>
-                         
-                      </td>
+   <p class="text-blue-500 hover:text-blue-700 cursor-pointer" onclick="event.stopPropagation(); showUpdateForm('{{ entry.code }}')">Update</p>
+
+    <br>
+</td>
                   {% endif %}
               </tr>
                           `);
@@ -791,8 +915,9 @@ fetch(`/procurements/delete/${fileId}/`, {
           });
       });
   });
-            </script>
-            <script type="text/javascript">
+</script>
+
+<script type="text/javascript">
   function showLoader() {
     // Show SweetAlert loader when form is submitted
     Swal.fire({
@@ -809,6 +934,11 @@ fetch(`/procurements/delete/${fileId}/`, {
       }
     });
   }
-            </script>
-        </body>
-    </html>
+</script>
+
+
+
+
+
+  </body>
+</html>

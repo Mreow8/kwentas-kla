@@ -49,7 +49,8 @@ class UserProfile(models.Model):
         return self.user.username
 
 class Entry(models.Model):
-    code = models.CharField(max_length=100)
+    code = models.CharField(max_length=100, unique=True)
+
     ppa = models.CharField(max_length=255)
     implementing_unit = models.CharField(max_length=255)
     location = models.CharField(max_length=255)

@@ -784,6 +784,12 @@ def search_projects(request, project_type):
         _, entries, all_entries = get_project_entries()
         year_condition = lambda year: year is not None
         template = 'KwentasApp/obligations.html'
+    elif project_type == 'check_payment':
+        _, _, all_entries = get_project_entries()
+        entries = all_entries
+        year_condition = lambda year: year is not None
+        template = 'KwentasApp/check_payment.html'
+
     elif project_type == 'disbursements':
         _, entries, all_entries = get_project_entries()
         year_condition = lambda year: year is not None
