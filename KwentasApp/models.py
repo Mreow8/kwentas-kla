@@ -33,7 +33,7 @@ class UploadedFileData(models.Model):
     file_type = models.CharField(max_length=10)  # PPMP / APP / POW
     file_name = models.CharField(max_length=255)  # Original name
     file = models.FileField(upload_to='uploads/', null=True, blank=True)
-
+    drive_file_id = models.CharField(max_length=100, blank=True, null=True) 
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -74,5 +74,5 @@ from django.db import models
 class FirebaseEntry(models.Model):
     code = models.CharField(max_length=255)
     ppa = models.CharField(max_length=255)
-    # Add other relevant fields here if needed
+    
 

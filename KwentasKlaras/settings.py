@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Store sessions in the DB
 SESSION_COOKIE_AGE = 1209600  # 2 weeks (should match login expiry)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Prevents auto logout on browser close
-
+GOOGLE_SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, 'keys/earnest-stock-460122-n6-98b15120ca57.json')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/

@@ -6,7 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 firebase-debug.log*
 firebase-debug.*.log*
-
+keys/earnest-stock-460122-n6-98b15120ca57.json
 # Firebase cache
 .firebase/
 

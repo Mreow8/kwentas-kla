@@ -1,64 +1,82 @@
-from django.shortcuts import render, redirect  # Renders HTML templates and redirects to a new view or URL
-from django.contrib.auth.forms import UserCreationForm  # Form for creating a new user account
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth import login, logout, authenticate  # Functions for handling login, logout, and authentication
-from django.contrib import messages  # Django messages framework for displaying feedback messages to users
-from django.contrib.auth.decorators import login_required, user_passes_test  # Decorators for restricting access
-from django.urls import reverse  # Generates URLs based on view names
-from django.views.decorators.csrf import csrf_exempt  # Exempts a view from CSRF protection
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse  # HTTP responses
-from django.views.decorators.cache import never_cache  # Prevents caching of the decorated view's response
-from django.contrib.auth.hashers import make_password  # Hashes passwords securely
-from django.core.mail import EmailMultiAlternatives, BadHeaderError, send_mail  # Email handling
-from django.template.loader import render_to_string  # Renders templates to a string, useful for email templates
-from django.views.decorators.http import require_POST, require_http_methods  # Restricts view methods
-from django.core.files.base import ContentFile  # For working with file-like objects in memory
-from django.conf import settings  # Accesses Django project settings
+from django.contrib.auth import login, logout, authenticate
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.views.decorators.cache import never_cache
+from django.contrib.auth.hashers import make_password
+from django.core.mail import EmailMultiAlternatives, BadHeaderError, send_mail
+from django.template.loader import render_to_string
+from django.views.decorators.http import require_POST, require_http_methods
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+from django.conf import settings
+from django.utils.text import get_valid_filename
 
-import logging  # Logging module for tracking events or errors
-import json  # JSON data handling
-import random  # Random number generation
-import string  # Includes constants and utilities for string manipulation
-import traceback  # For extracting and formatting exception tracebacks
-import os  # OS utilities for interacting with the file system
-import zipfile  # For handling zip archives
-from io import BytesIO  # In-memory byte stream
+import logging
+import json
+import random
+import string
+import traceback
+import os
+import zipfile
+from io import BytesIO
 
-import openpyxl  # Excel file handling
-from openpyxl.styles import Font, Alignment, Border, Side  # Styling for Excel cells
+import openpyxl
+from openpyxl.styles import Font, Alignment, Border, Side
 
-import qrcode  # For generating QR codes
-import pyotp  # For generating and verifying time-based OTPs
+import qrcode
+import pyotp
 
-from .forms import RegistrationForm  # Custom registration form specific to your app
-from .models import CustomUser, UserProfile, UploadedFileData, Entry  # Custom models
-from .projects import get_project_entries, indexPage  # Custom project utility functions
+from .forms import RegistrationForm
+from .models import CustomUser, UserProfile, UploadedFileData, Entry
+from .projects import get_project_entries, indexPage
 
+from django.http import JsonResponse
 
 def get_uploaded_files(request):
     project_code = request.GET.get('project_code')
     print({project_code})
-    
+
     if project_code:
         files = UploadedFileData.objects.filter(project_code=project_code)
         print(f"Found {len(files)} files for project code {project_code}")
 
-        file_data = [{
-             'file_id': file.file_id,  
-            'file_name': file.file_name,
-            'file_type': file.file_type,
-            'uploaded_at': file.uploaded_at.strftime('%Y-%m-%d %H:%M:%S'),
-            'file_url': request.build_absolute_uri(file.file.url)  # 👈 Add the download URL here
-        } for file in files]
+        file_data = []
+        for file in files:
+            # If drive_file_id looks like a full URL, use it
+            if file.drive_file_id and file.drive_file_id.startswith('http'):
+                url = file.drive_file_id
+                # Ensure URL ends with '/edit' (for Google Sheets)
+                if not url.endswith('/edit') and 'docs.google.com/spreadsheets' in url:
+                    url = url.rstrip('/') + '/edit'
+            elif file.file:
+                # Build absolute URI for local uploaded files
+                url = request.build_absolute_uri(file.file.url)
+            else:
+                url = ''
+
+            file_data.append({
+                'file_id': file.file_id,
+                'file_name': file.file_name,
+                'file_type': file.file_type,
+                'uploaded_at': file.uploaded_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'file_url': url,
+            })
 
         print(f"Files: {file_data}")
-        
+
         return JsonResponse({'files': file_data})
     else:
         return JsonResponse({'files': []})
 
-logger = logging.getLogger(__name__)  # Initializes logger for tracking events or errors
-print("KwentasApp.views module loaded")  # Debugging print
+import logging
+logger = logging.getLogger(__name__)
+print("KwentasApp.views module loaded")
 
 def update_project(request, code):
     entry = Entry.objects.get(code=code)  # or whatever model you are using
@@ -71,8 +89,49 @@ FILE_TYPE_KEYWORDS = {
     "POW": ["POW", "PROGRAM OF WORKS"]  
 }
 # views.py
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+import os
+def upload_excel_to_drive(local_path, filename, credentials_file):
+    creds = service_account.Credentials.from_service_account_file(
+        credentials_file,
+        scopes=['https://www.googleapis.com/auth/drive']
+    )
 
+    drive_service = build('drive', 'v3', credentials=creds)
+
+    # Create the file in Google Drive as a Google Spreadsheet
+    file_metadata = {
+        'name': filename,
+        'mimeType': 'application/vnd.google-apps.spreadsheet'
+    }
+
+    media = MediaFileUpload(
+        local_path,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
+    uploaded_file = drive_service.files().create(
+        body=file_metadata,
+        media_body=media,
+        fields='id'
+    ).execute()
+
+    file_id = uploaded_file.get('id')
+
+    # Optionally make the file readable by anyone with the link
+    drive_service.permissions().create(
+        fileId=file_id,
+        body={'type': 'anyone', 'role': 'reader'},
+    ).execute()
+
+    # Construct a direct URL to open the file in Google Sheets
+    sheets_url = f"https://docs.google.com/spreadsheets/d/{file_id}/edit"
+
+    return sheets_url
 @csrf_exempt
+
 def upload_excel(request):
     if request.method != 'POST':
         messages.error(request, "Invalid request method.")
@@ -80,7 +139,7 @@ def upload_excel(request):
 
     uploaded_file = request.FILES.get('excel_file')
     selected_type = (request.POST.get('file_type') or '').upper()
-    project_code  = request.POST.get('project_code')
+    project_code = request.POST.get('project_code')
 
     # Basic input checks
     if not uploaded_file:
@@ -98,11 +157,9 @@ def upload_excel(request):
     try:
         wb = openpyxl.load_workbook(uploaded_file, data_only=True)
         keywords = FILE_TYPE_KEYWORDS[selected_type]
-
-        found = False
         found_keywords = set()
 
-        # search each sheet, row, cell
+        # Search all sheets, rows, and cells
         for sheet in wb.worksheets:
             for row in sheet.iter_rows(values_only=True):
                 for cell in row:
@@ -111,49 +168,58 @@ def upload_excel(request):
                     text = str(cell).upper()
                     for kw in keywords:
                         if kw in text:
-                            found = True
                             found_keywords.add(kw)
-                    if found:
-                        break
-                if found:
-                    break
-            if found:
-                break
 
-        if found:
-    # Save file record
-            UploadedFileData.objects.create(
-            project_code = project_code,
-            file_type    = selected_type,
-            file         = uploaded_file,
-            file_name    = uploaded_file.name,
-            )
+        if found_keywords:
+            # Temporarily save the uploaded file
+            safe_name = get_valid_filename(uploaded_file.name)
+            temp_path = default_storage.save(f'temp/{safe_name}', uploaded_file)
+            local_file_path = os.path.join(settings.MEDIA_ROOT, temp_path)
 
-    # ✅ Update Entry remarks if matching project_code exists
+            try:
+               # Upload to Google Drive
+                service_account_path = os.path.join(settings.BASE_DIR, 'keys/earnest-stock-460122-n6-98b15120ca57.json')
+                sheet_url = upload_excel_to_drive(local_file_path, uploaded_file.name, service_account_path)
+                file_id = sheet_url.split('/d/')[1].split('/')[0]  # extract only the ID for DB
+
+
+                # Save to database with file_id
+                UploadedFileData.objects.create(
+                    project_code=project_code,
+                    file_type=selected_type,
+                    file=uploaded_file,
+                    file_name=uploaded_file.name,
+                    drive_file_id=sheet_url,
+                )
+
+                messages.success(
+                    request,
+                    f"Found keyword(s) [{', '.join(found_keywords)}] for {selected_type} — saved under project {project_code}. Remarks updated. "
+                    f"<a href='{sheet_url}' target='_blank'>Open in Google Sheets</a>"
+                )
+
+            except Exception as e:
+                messages.warning(request, f"Saved to database, but failed to upload to Google Sheets: {e}")
+            finally:
+                default_storage.delete(temp_path)
+
+            # Update Entry remarks
             try:
                 entry = Entry.objects.get(code=project_code)
                 entry.remarks = "Awarded Already"
-                print(f"\nUpdating entry for project code: {project_code}")
                 entry.save()
+                print(f"\nUpdated remarks for project code: {project_code}")
             except Entry.DoesNotExist:
-                print(f"\nNo matching entry found for project code: {project_code}")
+                print(f"\nNo entry found for project code: {project_code}")
                 messages.warning(request, f"No matching entry found for project code: {project_code}")
-
-            msgs = ", ".join(found_keywords)
-            messages.success(
-        request,
-        f"Found keyword(s) [{msgs}] for {selected_type} — saved under project {project_code}. Remarks updated."
-    )
         else:
-            messages.error(
-                request,
-                f"No '{selected_type}' or its full form found in the Excel file."
-            )
+            messages.error(request, f"No '{selected_type}' or its full form found in the Excel file.")
 
     except Exception as e:
         messages.error(request, f"Error reading Excel file: {e}")
 
     return redirect('procurements')
+
 def bulk_download_xlsx(request):
     if request.method == 'POST':
         selected_codes = request.POST.getlist('selected_entries')

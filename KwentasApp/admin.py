@@ -8,7 +8,7 @@ from django.contrib import admin
 from .models import UploadedFileData
 
 class UploadedFileDataAdmin(ModelAdmin):
-    list_display = ('file_id','file_name', 'file_type', 'project_code', 'uploaded_at')
+    list_display = ('file_id','file_name', 'file_type', 'project_code', 'uploaded_at','drive_file_id')
     search_fields = ('file_name', 'file_type', 'project_code')
     list_filter = ('file_type',)
 

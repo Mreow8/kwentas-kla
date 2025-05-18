@@ -565,10 +565,15 @@ function showUploadedFiles(projectCode) {
       }
 
       // Build file list
+
+
       const filesList = data.files.map(file => {
         let html = `
           <li style="margin-bottom: 0.5em;">
-            <strong>${file.file_type}</strong>: ${file.file_name}
+         <strong><a href="${file.file_url}" target="_blank" style="text-decoration: underline; color: #2980b9;">
+  ${file.file_type}: ${file.file_name}
+</a></strong>
+
             <br><small>Uploaded on: ${file.uploaded_at}</small>
             <br>
             <a href="${file.file_url}" download class="download-link">⬇ Download</a>
@@ -593,12 +598,12 @@ function showUploadedFiles(projectCode) {
         downloadAllBtn = `
           <div style="text-align:right; margin-bottom:10px;">
             <button id="bulk-download-btn" style="background-color:#3498db; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">
-              ⬇ Download All (Individually)
+              ⬇ Download All 
             </button>
+          
           </div>
         `;
       }
-
       // Show SweetAlert modal
    Swal.fire({
   title: 'Uploaded Files',
@@ -645,6 +650,7 @@ function showUploadedFiles(projectCode) {
             });
           });
 
+
           // Hook bulk download button
           const bulkBtn = document.getElementById('bulk-download-btn');
           if (bulkBtn) {
@@ -669,6 +675,7 @@ function showUploadedFiles(projectCode) {
       Swal.fire('Error', 'There was an error retrieving the files.', 'error');
     });
 }
+
 // Trigger file input click
 function triggerFileInput() {
     document.getElementById('fileInput').click();
