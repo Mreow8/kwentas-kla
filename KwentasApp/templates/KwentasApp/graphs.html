@@ -1,23 +1,49 @@
-{% load static tailwind_tags %}
-{% tailwind_css %}
+{% load static tailwind_tags %} {% tailwind_css %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-        <title>Admin Dashboard</title>
-        {% load static %}
-        <!-- Montserrat Font -->
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap"
-              rel="stylesheet" />
-        <!-- Material Icons -->
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
-              rel="stylesheet" />
-        <!-- Custom CSS -->
-        <link rel="stylesheet"
-              type="text/css"
-              href="{% static 'KwentasApp/css/graphs.css' %}" />
-        <style>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    {% load static %}
+    <!-- Montserrat Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Material Icons -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+      rel="stylesheet"
+    />
+    <!-- Custom CSS -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'KwentasApp/css/graphs.css' %}"
+    />
+    <style>
+      /* Change the menu background and border */
+      .apexcharts-menu {
+        background-color: #1e1e2f !important; /* Dark background */
+        border: 1px solid #444 !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+      }
+
+      /* Change the text and hover styles */
+      .apexcharts-menu-item {
+        color: #fff !important; /* White text */
+        background-color: transparent !important;
+        padding: 8px 12px !important;
+        font-family: "Montserrat", sans-serif !important;
+      }
+
+      /* Hover effect */
+      .apexcharts-menu-item:hover {
+        background-color: #333 !important; /* Hover background */
+        color: #00d1b2 !important; /* Optional hover text color */
+      }
+
       @media (min-width: 1024px) {
         /* Adjust breakpoint if needed */
         #sidebar {
@@ -32,116 +58,143 @@
         top: 0;
         height: 100vh;
       }
-        </style>
-    </head>
-    <body>
-        <div class="grid-container">
-            <!-- Header -->
-            <header class="header">
-                <div class="menu-icon" onclick="openSidebar()">
-                    <span class="material-icons-outlined" style="cursor: pointer">menu</span>
-                </div>
-            </header>
-            <!-- End Header -->
-            <!-- Sidebar -->
-            <aside id="sidebar"
-                   class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-md transition-transform duration-300 ease-in-out transform -translate-x-full">
-                <div class="p-4 h-full overflow-y-auto">
-                    <div class="flex items-center">
-                        <img src="{% static 'KwentasApp/img/logobrowser.jpg' %}"
-                             alt="Logo"
-                             class="h-8 w-auto mb-1" />
-                        <span class="ml-2 text-gray-700 dark:text-gray-300">Kwentas Klaras Digital PMIS v1.0</span>
-                    </div>
-                    <nav class="mt-10">
-                        <ul class="space-y-4">
-                            <li class="mb-2">
-                                <a href="#"
-                                   onclick="showSection('utilization')"
-                                   class="flex items-center p-2 text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                    <span class="material-icons-outlined mr-2">payments</span>
-                                    Budget Utilization:
-                                    <h3 class="ml-2">{{ average_utilization|floatformat:"-2" }}%</h3>
-                                </a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#"
-                                   onclick="showSection('spent')"
-                                   class="flex items-center p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                                    <span class="material-icons-outlined mr-2">money</span>
-                                    Expenses Overview
-                                </a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#"
-                                   onclick="showSection('comparison')"
-                                   id="comparison_button"
-                                   class="flex items-center p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                                    <span class="material-icons-outlined mr-2">query_stats</span>
-                                    Data Comparison
-                                </a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#"
-                                   onclick="showSection('department')"
-                                   class="flex items-center p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                                    <span class="material-icons-outlined mr-2">diversity_3</span>
-                                    Department Stats
-                                </a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="{% url 'homepage' %}"
-                                   class="flex items-center p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                                    <span class="material-icons-outlined mr-2">arrow_back</span>
-                                    Home Dashboard
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            </aside>
-            <!-- End Sidebar -->
-            <!-- Main -->
-            <main class="main-container">
-                <!-- Comparison Section -->
-                <div class="charts" id="comparison" style="display: none">
-                    <div class="charts-card">
-                        <h2 class="chart-title">Comparison</h2>
-                        <div id="comparison-chart"></div>
-                    </div>
-                </div>
-                <span id="averageUtilization" style="display: none">{{ average_utilization|floatformat:"-2" }}</span>
-                <!-- Utilization Rate Section -->
-                <div class="charts" id="utilization" style="display: none">
-                    <div class="charts-card">
-                        <h2 class="chart-title">Utilization Rate</h2>
-                        <div id="utilization-chart"></div>
-                    </div>
-                </div>
-                <!-- Spent Section -->
-                <div class="charts" id="spent">
-                    <div class="charts-card">
-                        <h2 class="chart-title">Spent</h2>
-                        <button id="toggle-view">Switch to Daily View</button>
-                        <!-- Toggle button -->
-                        <div id="spent-chart"></div>
-                    </div>
-                </div>
-                <!-- Department Section -->
-                <div class="charts" id="department" style="display: block">
-                    <div class="charts-card">
-                        <h2 class="chart-title">Department Utilization Rates</h2>
-                        <div id="department-chart"></div>
-                    </div>
-                </div>
-            </main>
-            <!-- End Main -->
+    </style>
+  </head>
+  <body>
+    <div class="grid-container">
+      <!-- Header -->
+      <header class="header">
+        <div class="menu-icon" onclick="openSidebar()">
+          <span class="material-icons-outlined" style="cursor: pointer"
+            >menu</span
+          >
         </div>
-        <!-- Scripts -->
-        <!-- ApexCharts -->
-        <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest"></script>
-        <!-- Custom JS -->
-        <script>
+      </header>
+      <!-- End Header -->
+      <!-- Sidebar -->
+      <aside
+        id="sidebar"
+        class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-md transition-transform duration-300 ease-in-out transform -translate-x-full"
+      >
+        <div class="p-4 h-full overflow-y-auto">
+          <div class="flex items-center">
+            <img
+              src="{% static 'KwentasApp/img/logobrowser.jpg' %}"
+              alt="Logo"
+              class="h-8 w-auto mb-1"
+            />
+            <span class="ml-2 text-gray-700 dark:text-gray-300"
+              >Kwentas Klaras Digital PMIS v1.0</span
+            >
+          </div>
+          <nav class="mt-10">
+            <ul class="space-y-4">
+              <li class="mb-2">
+                <a
+                  href="#"
+                  onclick="showSection('utilization')"
+                  data-section="utilization"
+                  class="sidebar-link flex items-center p-2 rounded-lg"
+                >
+                  <span class="material-icons-outlined mr-2">payments</span>
+                  Budget Utilization:
+                  <h3 class="ml-2">
+                    {{ average_utilization|floatformat:"-2" }}%
+                  </h3>
+                </a>
+              </li>
+              <li class="mb-2">
+                <a
+                  href="#"
+                  onclick="showSection('spent')"
+                  data-section="spent"
+                  class="sidebar-link flex items-center p-2 rounded-lg"
+                >
+                  <span class="material-icons-outlined mr-2">money</span>
+                  Expenses Overview
+                </a>
+              </li>
+              <li class="mb-2">
+                <a
+                  href="#"
+                  onclick="showSection('comparison')"
+                  data-section="comparison"
+                  class="sidebar-link flex items-center p-2 rounded-lg"
+                >
+                  <span class="material-icons-outlined mr-2">query_stats</span>
+                  Data Comparison
+                </a>
+              </li>
+              <li class="mb-2">
+                <a
+                  href="#"
+                  onclick="showSection('department')"
+                  data-section="department"
+                  class="sidebar-link flex items-center p-2 rounded-lg"
+                >
+                  <span class="material-icons-outlined mr-2">diversity_3</span>
+                  Department Stats
+                </a>
+              </li>
+              <li class="mb-2">
+                <a
+                  href="{% url 'homepage' %}"
+                  class="flex items-center p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                >
+                  <span class="material-icons-outlined mr-2">arrow_back</span>
+                  Home Dashboard
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </aside>
+      <!-- End Sidebar -->
+      <!-- Main -->
+      <main class="main-container">
+        <!-- Comparison Section -->
+        <div class="charts" id="comparison" style="display: none">
+          <div class="charts-card">
+            <h2 class="chart-title">Comparison</h2>
+            <div id="comparison-chart"></div>
+          </div>
+        </div>
+        <span id="averageUtilization" style="display: none"
+          >{{ average_utilization|floatformat:"-2" }}</span
+        >
+        <!-- Utilization Rate Section -->
+        <div class="charts" id="utilization" style="display: none">
+          <div class="charts-card">
+            <h2 class="chart-title">Utilization Rate</h2>
+            <div id="utilization-chart"></div>
+          </div>
+        </div>
+        <!-- Spent Section -->
+        <div class="charts" id="spent">
+          <div class="charts-card">
+            <h2 class="chart-title">Spent</h2>
+            <button id="toggle-view" style="color: black">
+              Switch to Daily View
+            </button>
+            <!-- Toggle button -->
+            <div id="spent-chart"></div>
+          </div>
+        </div>
+        <!-- Department Section -->
+        <div class="charts" id="department" style="display: block">
+          <div class="charts-card">
+            <h2 class="chart-title">Department Utilization Rates</h2>
+            <div id="department-chart"></div>
+          </div>
+        </div>
+      </main>
+      <!-- End Main -->
+    </div>
+    <!-- Scripts -->
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest"></script>
+    <!-- Custom JS -->
+    <script>
       // Function to show the selected section and hide others
 
       function toggleSidebar() {
@@ -191,28 +244,41 @@
 
       // Function to highlight the active sidebar button
       function highlightActiveButton(activeId) {
-        const buttons = document.querySelectorAll(".sidebar-list-item");
+        const buttons = document.querySelectorAll(".sidebar-link");
 
-        buttons.forEach((button) => {
-          // Reset background color and text color for all buttons and <a> elements
-          button.style.backgroundColor = "";
-          const link = button.querySelector("a");
-          if (link) {
-            link.style.color = ""; // Reset the link color
-          }
+        buttons.forEach((btn) => {
+          // Reset all buttons
+          btn.classList.remove(
+            "text-blue-600",
+            "bg-blue-50",
+            "dark:text-blue-500",
+            "dark:bg-blue-900/20"
+          );
+          btn.classList.add(
+            "text-gray-700",
+            "hover:bg-gray-100",
+            "dark:text-gray-200",
+            "dark:hover:bg-gray-700"
+          );
         });
 
-        // Set background color for the active button
-        const activeButton = document.querySelector(
-          `.sidebar-list-item[onclick="showSection('${activeId}')"]`
+        // Highlight the active button
+        const activeBtn = document.querySelector(
+          `.sidebar-link[data-section="${activeId}"]`
         );
-        if (activeButton) {
-          activeButton.style.backgroundColor = "blue"; // Change to desired color
-
-          const activeLink = activeButton.querySelector("a");
-          if (activeLink) {
-            activeLink.style.color = "white"; // Set the link color to white
-          }
+        if (activeBtn) {
+          activeBtn.classList.remove(
+            "text-gray-700",
+            "hover:bg-gray-100",
+            "dark:text-gray-200",
+            "dark:hover:bg-gray-700"
+          );
+          activeBtn.classList.add(
+            "text-blue-600",
+            "bg-blue-50",
+            "dark:text-blue-500",
+            "dark:bg-blue-900/20"
+          );
         }
       }
 
@@ -220,9 +286,9 @@
       document.addEventListener("DOMContentLoaded", () => {
         showSection("utilization");
       });
-        </script>
-        <!-- Utilization rate chart -->
-        <script>
+    </script>
+    <!-- Utilization rate chart -->
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Get the average utilization from the context in your template
         var utilizationValue = parseFloat(
@@ -296,9 +362,9 @@
           console.error("Chart element not found!");
         }
       });
-        </script>
-        <!--Spent Chart-->
-        <script>
+    </script>
+    <!--Spent Chart-->
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         const toggleButton = document.getElementById("toggle-view");
         let currentView = "monthly"; // Track the current view (monthly or daily)
@@ -441,9 +507,9 @@
           fetchAndRenderData(currentView);
         });
       });
-        </script>
-        <!--Comparison Chart-->
-        <script>
+    </script>
+    <!--Comparison Chart-->
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Fetch monthly comparison data
         fetch("/api/get_monthly_comparison/") // Adjust this URL to your Django endpoint
@@ -553,9 +619,9 @@
             console.error("Error fetching comparison data:", error)
           );
       });
-        </script>
-        <!--Department utilization rate-->
-        <script>
+    </script>
+    <!--Department utilization rate-->
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Function to fetch the department utilization rate data
         async function fetchDepartmentUtilizationRate() {
@@ -649,6 +715,6 @@
         // Fetch and render the department utilization rate chart when the page loads
         fetchDepartmentUtilizationRate();
       });
-        </script>
-    </body>
+    </script>
+  </body>
 </html>

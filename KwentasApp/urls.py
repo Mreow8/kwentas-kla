@@ -15,7 +15,7 @@ path('get_uploaded_files/', views.get_uploaded_files, name='get_uploaded_files')
 path('project/update/<str:code>/', views.update_project, name='update_project'),
     path('procurements/delete/<int:file_id>/', views.delete_uploaded_file, name='delete_file'),
 
-
+  path('contact/', views.contact_view, name='contact'),
     path('upload_excel/', views.upload_excel, name='upload_excel'),
     path('login/', views.login_view, name='login'),
     path('create_entry/', create_entry, name='create_entry'),

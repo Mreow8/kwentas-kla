@@ -37,7 +37,8 @@ from .models import CustomUser, UserProfile, UploadedFileData, Entry
 from .projects import get_project_entries, indexPage
 
 from django.http import JsonResponse
-
+def contact_view(request):
+    return render(request, 'contact.html')
 def get_uploaded_files(request):
     project_code = request.GET.get('project_code')
     print({project_code})

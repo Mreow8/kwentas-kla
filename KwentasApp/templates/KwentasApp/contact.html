@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kwentas Klaras - Contact</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-100 text-gray-800">
+    <!-- Header -->
+    <header class="bg-white shadow-md p-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold">Kwentas Klaras Digital PMIS v1.0</h1>
+      <nav class="space-x-4">
+        <a href="{% url 'home' %}" class="text-blue-600 font-semibold">Home</a>
+        <a href="{% url 'about' %}" class="text-blue-600 font-semibold"
+          >About</a
+        >
+        <a
+          href="{% url 'contact' %}"
+          class="text-blue-600 font-semibold underline"
+          >Contact</a
+        >
+      </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="p-6">
+      <section class="bg-white p-6 rounded shadow max-w-3xl mx-auto">
+        <h3 class="text-2xl font-bold mb-4">Contact Us</h3>
+        <p class="mb-4">
+          If you have any questions, suggestions, or need help using Kwentas
+          Klaras, feel free to reach out through the following channels:
+        </p>
+        <ul class="space-y-2 text-lg">
+          <li>
+            📧 Email:
+            <a href="mailto:support@kwentasklaras.ph" class="text-blue-600"
+              >support@kwentasklaras.ph</a
+            >
+          </li>
+          <li>📞 Phone: (032) 123-4567</li>
+          <li>🏛️ Office: Municipal Hall, Boljoon, Cebu, Philippines</li>
+        </ul>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center mt-10 p-4 text-sm text-gray-600">
+      &copy; 2025 Kwentas Klaras. All rights reserved.
+    </footer>
+  </body>
+</html>
